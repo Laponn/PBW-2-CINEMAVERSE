@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers; // Namespace harus Controller
 
 use App\Models\Movie;
 use Illuminate\Http\Request;
@@ -17,7 +17,6 @@ class MovieController extends Controller
     // Menampilkan SATU Film (Detail)
     public function show($id)
     {
-        // Kita butuh relasi showtimes (jadwal) karena ditampilkan di halaman detail film
         $movie = Movie::with(['showtimes.studio'])->findOrFail($id);
         return view('movie_detail', compact('movie'));
     }
