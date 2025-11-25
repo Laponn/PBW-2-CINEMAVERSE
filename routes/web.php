@@ -1,20 +1,18 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MovieController;
+use App\Http\Controllers\ShowtimeController;
+use App\Http\Controllers\BookingController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// 1. Homepage & Detail Film -> Masuk ke MovieController
+Route::get('/', [MovieController::class, 'index'])->name('home');
+Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movie.show');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// 2. Pilih Kursi -> Masuk ke ShowtimeController (Karena pilih kursi itu lihat jadwal)
+Route::get('/booking/seats/{id}', [ShowtimeController::class, 'show'])->name('booking.seat');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
+// 3. Proses Bayar -> Masuk ke BookingController
+Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
 require __DIR__.'/auth.php';
