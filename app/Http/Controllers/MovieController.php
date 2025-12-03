@@ -30,3 +30,7 @@ class MovieController extends Controller
 }
 
 }
+
+$movies = Movie::where('status', 'NOW_SHOWING')->get();
+$featuredMovie = $movies->first(); // atau pilih khusus
+return view('welcome', compact('movies', 'featuredMovie'));
