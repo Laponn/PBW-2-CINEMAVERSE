@@ -20,4 +20,13 @@ class MovieController extends Controller
         $movie = Movie::with(['showtimes.studio'])->findOrFail($id);
         return view('movie_detail', compact('movie'));
     }
+    public function search(Request $request)
+{
+    $query = $request->get('q');
+
+    $movies = Movie::where('title', 'like', "%{$query}%")->get();
+
+    return view('search', compact('movies', 'query'));
+}
+
 }

@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 
 Route::get('/', [MovieController::class, 'index'])->name('home');
 Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movie.show');
+Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
+
 
 // Pilih Kursi & Booking
 Route::get('/booking/seats/{id}', [ShowtimeController::class, 'show'])->name('booking.seat');
