@@ -6,44 +6,58 @@ use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class MovieController extends Controller
 {
+    // Helper kecil buat cek admin
+    private function ensureAdmin()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+    }
+
     public function index()
     {
+        $this->ensureAdmin();
+
         $movies = Movie::latest()->get();
         return view('admin.movies.index', compact('movies'));
     }
 
     public function create()
     {
+        $this->ensureAdmin();
+
         return view('admin.movies.create');
     }
 
     public function store(Request $request)
     {
+        $this->ensureAdmin();
+
         $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-            'duration_minutes' => 'required|integer',
-            'poster' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
-            'status' => 'required'
+            'title'             => 'required',
+            'description'       => 'required',
+            'duration_minutes'  => 'required|integer',
+            'poster'            => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'status'            => 'required',
         ]);
 
-        // Upload Gambar
         $posterPath = null;
         if ($request->hasFile('poster')) {
             $posterPath = $request->file('poster')->store('posters', 'public');
         }
 
         Movie::create([
-            'title' => $request->title,
-            'description' => $request->description,
+            'title'            => $request->title,
+            'description'      => $request->description,
             'duration_minutes' => $request->duration_minutes,
-            'release_date' => now(), // Default hari ini
-            'poster_url' => $posterPath ? '/storage/' . $posterPath : null,
-            'trailer_url' => $request->trailer_url,
-            'status' => $request->status,
+            'release_date'     => now(),
+            'poster_url'       => $posterPath ? '/storage/' . $posterPath : null,
+            'trailer_url'      => $request->trailer_url,
+            'status'           => $request->status,
         ]);
 
         return redirect()->route('admin.movies.index')->with('success', 'Film berhasil disimpan!');
@@ -51,25 +65,23 @@ class MovieController extends Controller
 
     public function edit(Movie $movie)
     {
+        $this->ensureAdmin();
+
         return view('admin.movies.edit', compact('movie'));
     }
 
     public function update(Request $request, Movie $movie)
     {
+        $this->ensureAdmin();
+
         $request->validate([
-            'title' => 'required',
+            'title'  => 'required',
             'poster' => 'nullable|image|max:2048',
         ]);
 
         $data = $request->all();
 
         if ($request->hasFile('poster')) {
-            // Hapus gambar lama (Optional, jika mau hemat storage)
-            // if($movie->poster_url) {
-            //      $oldPath = str_replace('/storage/', '', $movie->poster_url);
-            //      Storage::disk('public')->delete($oldPath);
-            // }
-
             $path = $request->file('poster')->store('posters', 'public');
             $data['poster_url'] = '/storage/' . $path;
         }
@@ -81,6 +93,8 @@ class MovieController extends Controller
 
     public function destroy(Movie $movie)
     {
+        $this->ensureAdmin();
+
         $movie->delete();
         return redirect()->route('admin.movies.index')->with('success', 'Film dihapus!');
     }

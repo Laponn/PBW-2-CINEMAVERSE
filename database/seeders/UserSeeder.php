@@ -12,8 +12,8 @@ class UserSeeder extends Seeder
     {
         // Buat Akun Admin
         User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@cinemaverse.com',
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
             'password' => Hash::make('password'), // Passwordnya: password
             'role' => 'admin',
         ]);
