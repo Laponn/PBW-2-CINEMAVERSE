@@ -696,7 +696,7 @@
             ticketTypeButtons[0].click();
         } else {
             updateTotal();
-        }
+        } 
     });
 </script>
 
