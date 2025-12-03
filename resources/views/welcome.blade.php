@@ -43,8 +43,6 @@
 
     <main class="pt-20 pb-16">
         <div class="max-w-6xl mx-auto px-6 space-y-16">
-
-<<<<<<< HEAD
             {{-- HERO PROMO --}}
             @php
                 $featured = $featuredMovie ?? ($movies->first() ?? null);
