@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Auth;
 // PUBLIC ROUTES
 // =========================
 Route::get('/', [MovieController::class, 'index'])->name('home');
-Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movie.show');
+
+// PERBAIKAN: Tambahkan 's' pada name agar menjadi 'movies.show' sesuai HTML
+Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movies.show');
+
 Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
 
@@ -29,7 +32,7 @@ Route::middleware('auth')->group(function () {
 // ADMIN ROUTES
 // =========================
 Route::prefix('admin')
-    ->middleware(['auth'])   // ⬅ HAPUS 'role:admin'
+    ->middleware(['auth'])   // ⬅ HAPUS 'role:admin' sementara untuk debugging jika perlu
     ->name('admin.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

@@ -69,95 +69,10 @@
                                 <span class="ml-2 h-px w-10 bg-red-500/60"></span>
                             </span>
 
-<<<<<<< HEAD
                             <h1 class="mt-4 text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
                                 Nonton Lebih <span class="text-red-500">Seru</span>  
                                 <br class="hidden md:block">
                                 dengan Cinema<span class="text-red-500">Verse</span>
-=======
-                    {{-- Menu aktif: Tiket --}}
-                    <div
-                        class="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full shadow-lg shadow-red-500/30">
-                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                        <span class="uppercase tracking-[0.25em] text-[11px]">Tiket</span>
-                    </div>
-
-                    <button class="block text-left w-full text-gray-300/80 hover:text-white transition">
-                        Home
-                    </button>
-                    <button class="block text-left w-full text-gray-300/80 hover:text-white transition">
-                        Trending
-                    </button>
-                    <button class="block text-left w-full text-gray-300/80 hover:text-white transition">
-                        Movie List
-                    </button>
-
-                    <div class="pt-6 text-xs text-gray-500 uppercase tracking-[0.2em]">
-                        Account
-                    </div>
-                    <button class="block text-left w-full text-gray-300/80 hover:text-white transition text-sm">
-                        Setting
-                    </button>
-                    <button class="block text-left w-full text-gray-300/80 hover:text-white transition text-sm">
-                        My profile
-                    </button>
-                </nav>
-
-                <div class="px-8 pb-6 text-[11px] text-gray-500">
-                    © {{ date('Y') }} CinemaVerse
-                </div>
-            </aside>
-
-            {{-- KONTEN KANAN --}}
-            <main class="flex-1 px-5 sm:px-8 md:px-10 py-7 md:py-10 flex flex-col gap-8">
-
-                {{-- BAR ATAS: KEMBALI + SEARCH --}}
-                <div class="flex items-center justify-between mb-1 gap-4">
-                    <button type="button"
-                            onclick="history.back()"
-                            class="inline-flex items-center gap-2 text-xs text-gray-300 hover:text-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8"
-                             viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M15 19l-7-7 7-7"/>
-                        </svg>
-                        <span>Kembali</span>
-                    </button>
-
-                    {{-- Search (opsional) --}}
-                    <form action="{{ route('movie.search') }}" method="GET"
-                          class="hidden md:flex items-center bg-black/60 border border-white/15 rounded-full px-4 py-1.5 text-xs">
-                        <input type="text" name="q" placeholder="Cari judul film..."
-                               class="bg-transparent focus:outline-none placeholder:text-gray-500 text-gray-100 w-44 lg:w-64">
-                        <button type="submit"
-                                class="ml-3 px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 transition">
-                            Cari
-                        </button>
-                    </form>
-                </div>
-
-                {{-- HEADER FILM + STEP --}}
-                <section class="space-y-4">
-                    <div class="flex flex-col md:flex-row md:items-center gap-5">
-                        @if($featuredMovie)
-                            <div class="w-full md:w-40 lg:w-48 rounded-2xl overflow-hidden border border-white/15 bg-black/60">
-                                @if($featuredMovie->poster_url)
-                                    <img src="{{ $featuredMovie->poster_url }}" alt="{{ $featuredMovie->title }}"
-                                         class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"></div>
-                                @endif
-                            </div>
-                        @endif
-
-                        <div class="space-y-2 md:flex-1">
-                            <p class="text-[11px] tracking-[0.35em] uppercase text-red-400">
-                                Pemesanan tiket
-                            </p>
-
-                            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight">
-                                {{ $featuredMovie?->title ?? 'Pilih Film' }}
->>>>>>> a1525b89a5a09d60c8ccb07211e58b8d25f3ba2f
                             </h1>
 
                             <p class="mt-4 text-sm md:text-base text-zinc-300 max-w-xl">
