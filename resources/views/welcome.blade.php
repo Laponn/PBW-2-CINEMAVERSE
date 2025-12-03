@@ -23,20 +23,36 @@
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
                 <a href="{{ route('home') }}" class="text-red-500">Home</a>
-                <a href="#" class="text-gray-300 hover:text-white">Tiket</a>
+                <a href="#now-showing" class="text-gray-300 hover:text-white">Tiket</a>
                 <a href="#" class="text-gray-300 hover:text-white">Trending</a>
                 <a href="#" class="text-gray-300 hover:text-white">Saved</a>
-                <a href="#" class="text-gray-300 hover:text-white">Playlist</a>
             </nav>
 
             <div class="flex items-center gap-3">
-                <form action="#" method="GET" class="hidden sm:flex items-center bg-zinc-900 rounded-full px-3 py-1.5 text-xs border border-zinc-700 focus-within:border-red-500 transition">
+                <form action="{{ route('movie.search') }}" method="GET" class="hidden sm:flex items-center bg-zinc-900 rounded-full px-3 py-1.5 text-xs border border-zinc-700 focus-within:border-red-500 transition">
                     <input type="text" name="q" placeholder="Cari judul film..." class="bg-transparent border-0 focus:ring-0 text-xs placeholder:text-zinc-500 w-32 md:w-48">
                     <button type="submit" class="ml-2 px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 font-semibold">Cari</button>
                 </form>
-                <a href="#" class="hidden sm:inline-flex text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400">
-                    Download App
-                </a>
+                
+                {{-- AUTH BUTTONS (Perubahan di sini) --}}
+                @if (Route::has('login'))
+                    <div class="flex items-center gap-2">
+                        @auth
+                            <a href="{{ url('/dashboard') }}" class="hidden sm:inline-flex text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400">
+                                Dashboard
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="hidden sm:inline-flex text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400">
+                                Log in
+                            </a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="hidden sm:inline-flex text-xs font-semibold bg-red-600 rounded-full px-4 py-1.5 hover:bg-red-500 border border-transparent">
+                                    Register
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                @endif
             </div>
         </div>
     </header>
@@ -45,24 +61,20 @@
         <div class="max-w-6xl mx-auto px-6 space-y-16">
             {{-- HERO PROMO --}}
             @php
+                // Gunakan $featuredMovie dari controller jika ada, atau fallback
                 $featured = $featuredMovie ?? ($movies->first() ?? null);
             @endphp
 
             @if($featured)
             <section class="relative overflow-hidden rounded-3xl border border-red-900/60 bg-gradient-to-r from-black via-zinc-900 to-black shadow-2xl shadow-red-900/30">
-                <div class="absolute inset-0 opacity-30">
+                {{-- Background Effects --}}
+                <div class="absolute inset-0 opacity-30 pointer-events-none">
                     <div class="w-full h-full bg-[radial-gradient(circle_at_top,_#f97316_0,_transparent_55%),_radial-gradient(circle_at_bottom,_#ef4444_0,_transparent_55%)]"></div>
-=======
-            {{-- SIDEBAR KIRI --}}
-            <aside class="hidden sm:flex flex-col w-60 bg-black/75 backdrop-blur-sm border-r border-white/10">
-                <div class="px-8 pt-8 pb-6 text-2xl font-semibold tracking-[0.25em]">
-                    <span class="text-red-500">cinema</span><span>VERSE</span>
->>>>>>> a1525b89a5a09d60c8ccb07211e58b8d25f3ba2f
                 </div>
 
-                <div class="relative flex flex-col lg:flex-row">
-                    {{-- kiri: teks promo --}}
-                    <div class="flex-1 p-8 lg:p-10 flex flex-col justify-between">
+                <div class="relative flex flex-col md:flex-row items-center p-8 md:p-12 gap-8">
+                    {{-- Left: Text --}}
+                    <div class="flex-1 space-y-6">
                         <div>
                             <span class="inline-flex items-center text-xs font-semibold tracking-[0.3em] text-red-400 uppercase">
                                 Promo Spesial
@@ -70,50 +82,41 @@
                             </span>
 
                             <h1 class="mt-4 text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-                                Nonton Lebih <span class="text-red-500">Seru</span>  
-                                <br class="hidden md:block">
-                                dengan Cinema<span class="text-red-500">Verse</span>
+                                {{ $featured->title }}
                             </h1>
-
+                            
                             <p class="mt-4 text-sm md:text-base text-zinc-300 max-w-xl">
-                                Pesan tiket bioskop favoritmu dengan cepat, pilih kursi terbaik,
-                                dan nikmati pengalaman menonton ala <span class="text-red-400 font-semibold">CINEMAVERSE</span>.
+                                {{ Str::limit($featured->description ?? 'Saksikan film-film terbaik pilihan CinemaVerse dengan kualitas audio visual yang memukau.', 150) }}
                             </p>
+                        </div>
 
-                            <div class="mt-6 flex flex-wrap items-center gap-4 text-xs text-zinc-300">
-                                <div class="px-4 py-2 rounded-full border border-red-500/70 bg-red-600/10 uppercase tracking-[0.2em] font-semibold">
-                                    Buy 1 Get 1 • Limited
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                    <span>Hari ini di bioskop pilihan</span>
-                                </div>
+                        <div class="flex flex-wrap items-center gap-4 text-xs text-zinc-300">
+                            <div class="px-4 py-2 rounded-full border border-red-500/70 bg-red-600/10 uppercase tracking-[0.2em] font-semibold">
+                                Now Showing
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                <span>Tiket Tersedia</span>
                             </div>
                         </div>
 
-                        <div class="mt-6 flex flex-wrap items-center gap-4">
-                            <a href="{{ route('movies.show', $featured->id) }}" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-500 text-sm font-semibold shadow-lg shadow-red-700/40">
-                                Beli Tiket Sekarang
+                        <div class="flex flex-wrap items-center gap-4 pt-2">
+                            <a href="{{ route('movies.show', $featured->id) }}" class="inline-flex items-center justify-center px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-sm font-bold shadow-lg shadow-red-700/40 transition hover:scale-105">
+                                Beli Tiket
                             </a>
-                            <a href="#now-showing" class="text-sm text-zinc-300 hover:text-white underline underline-offset-4 decoration-zinc-600 hover:decoration-red-500">
-                                Lihat film yang sedang tayang
+                            <a href="#now-showing" class="text-sm font-medium text-zinc-300 hover:text-white underline underline-offset-4 decoration-zinc-600 hover:decoration-red-500 transition">
+                                Lihat Jadwal Lainnya
                             </a>
                         </div>
                     </div>
 
-                    {{-- kanan: poster --}}
-                    <div class="flex-1 lg:max-w-md xl:max-w-lg p-6 lg:p-8 flex items-center justify-center">
-                        <div class="relative w-full max-w-xs">
-                            <div class="absolute -inset-4 bg-red-600/40 blur-3xl opacity-30"></div>
-                            <img src="{{ $featured->poster_url ?? 'https://via.placeholder.com/400x600?text=CinemaVerse' }}"
-                                 alt="{{ $featured->title }}"
-                                 class="relative w-full rounded-3xl border border-zinc-700 shadow-2xl shadow-black/80 object-cover">
-                            <div class="absolute -bottom-4 left-4 bg-black/80 backdrop-blur px-3 py-2 rounded-2xl text-xs border border-zinc-700 flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-full bg-red-600/80 text-[10px] font-semibold tracking-wide uppercase">
-                                    Now Showing
-                                </span>
-                                <span class="font-semibold truncate max-w-[140px]">{{ $featured->title }}</span>
-                            </div>
+                    {{-- Right: Poster --}}
+                    <div class="flex-1 flex justify-center md:justify-end">
+                        <div class="relative w-64 md:w-72 lg:w-80 group">
+                            <div class="absolute -inset-1 bg-gradient-to-tr from-red-600 to-orange-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                            <img src="{{ $featured->poster_url }}" 
+                                 alt="{{ $featured->title }}" 
+                                 class="relative w-full rounded-2xl border border-zinc-800 shadow-2xl transform group-hover:scale-[1.02] transition duration-500 object-cover aspect-[2/3]">
                         </div>
                     </div>
                 </div>
@@ -122,60 +125,63 @@
 
             {{-- NOW SHOWING --}}
             <section id="now-showing">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between mb-8">
                     <div>
                         <h2 class="text-2xl md:text-3xl font-extrabold tracking-wide">
-                            NOW <span class="text-red-500">SHOWING</span> IN CINEMAS
+                            NOW <span class="text-red-500">SHOWING</span>
                         </h2>
                         <p class="text-xs md:text-sm text-zinc-400 mt-1">
-                            Pilih film favoritmu dan pesan kursi terbaik hanya dalam beberapa klik.
+                            Film-film terbaru yang sedang tayang di bioskop.
                         </p>
                     </div>
-
-                    <a href="#" class="hidden sm:inline-flex text-xs md:text-sm font-semibold px-4 py-2 rounded-full border border-zinc-600 hover:border-red-500 hover:text-red-400">
-                        Lihat Semua Jadwal
-                    </a>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                     @forelse($movies as $movie)
-                        <div class="group bg-zinc-950/70 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/80 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-red-900/40 transition transform">
+                        <div class="group bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-red-600/50 hover:bg-zinc-900 transition duration-300">
+                            {{-- Poster --}}
                             <div class="relative aspect-[2/3] overflow-hidden">
                                 <img src="{{ $movie->poster_url }}" alt="{{ $movie->title }}"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-70 transition"></div>
-                                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px]">
-                                    <span class="px-2 py-1 rounded-full bg-red-600/90 font-semibold uppercase tracking-wide">Book Now</span>
-                                    <span class="px-2 py-1 rounded-full bg-black/80 border border-zinc-600 text-zinc-200">
-                                        {{ $movie->duration_minutes ?? '--' }} Min
+                                     class="w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-in-out">
+                                
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                                
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2 py-1 bg-black/60 backdrop-blur border border-white/10 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                        {{ $movie->duration_minutes }} Min
                                     </span>
                                 </div>
                             </div>
-                            <div class="p-3.5">
-                                <h3 class="text-sm md:text-base font-semibold line-clamp-2 min-h-[2.5rem]">
+
+                            {{-- Info --}}
+                            <div class="p-4">
+                                <h3 class="font-bold text-base leading-tight line-clamp-1 group-hover:text-red-500 transition">
                                     {{ $movie->title }}
                                 </h3>
-                                <p class="mt-1 text-[11px] text-zinc-400">
-                                    Rilis: {{ \Carbon\Carbon::parse($movie->release_date)->format('d M Y') }}
+                                <p class="text-xs text-zinc-500 mt-1 mb-4">
+                                    {{ $movie->genre ?? 'Action, Drama' }}
                                 </p>
-                                <a href="{{ route('movies.show', $movie->id) }}"
-                                   class="mt-3 inline-flex w-full items-center justify-center text-xs font-semibold px-3 py-2 rounded-full bg-red-600/90 hover:bg-red-500">
-                                    Lihat Detail &amp; Jadwal
+                                
+                                <a href="{{ route('movies.show', $movie->id) }}" class="block w-full py-2 rounded-lg bg-zinc-800 hover:bg-red-600 text-center text-xs font-bold uppercase tracking-widest transition-colors duration-300">
+                                    Book Ticket
                                 </a>
                             </div>
                         </div>
                     @empty
-                        <p class="col-span-4 text-center text-zinc-500 py-8">
-                            Belum ada film yang tayang saat ini.
-                        </p>
+                        <div class="col-span-full flex flex-col items-center justify-center py-12 text-zinc-500">
+                            <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                            <p>Belum ada film yang tayang saat ini.</p>
+                        </div>
                     @endforelse
                 </div>
             </section>
 
-            {{-- OPSIONAL: COMING SOON / EVENT PROMO BISA DITAMBAH DI SINI --}}
-
         </div>
     </main>
+    
+    <footer class="border-t border-white/10 bg-black py-8 mt-12 text-center text-xs text-zinc-600">
+        <p>&copy; {{ date('Y') }} CinemaVerse. All rights reserved.</p>
+    </footer>
 
 </body>
 </html>

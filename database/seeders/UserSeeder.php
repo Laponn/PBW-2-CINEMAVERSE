@@ -10,20 +10,27 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buat Akun Admin
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'), // Passwordnya: password
-            'role' => 'admin',
-        ]);
+        // 1. Akun Admin
+        // updateOrCreate akan mengecek: Apakah email ini ada?
+        // Jika ADA: Update datanya (password/nama/role).
+        // Jika TIDAK ADA: Buat baru.
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'], // Kunci pencarian (Search Key)
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
 
-        // Buat Akun User Biasa (Contoh)
-        User::create([
-            'name' => 'Budi Customer',
-            'email' => 'user@cinemaverse.com',
-            'password' => Hash::make('password'),
-            'role' => 'customer',
-        ]);
+        // 2. Akun User Biasa
+        User::updateOrCreate(
+            ['email' => 'user@cinemaverse.com'], // Kunci pencarian
+            [
+                'name' => 'Budi Customer',
+                'password' => Hash::make('password'),
+                'role' => 'customer',
+            ]
+        );
     }
 }
