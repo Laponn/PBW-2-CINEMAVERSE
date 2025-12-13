@@ -49,14 +49,7 @@ Route::prefix('admin')
 // =========================
 Route::get('/dashboard', function () {
 
-    $user = Auth::user();
-
-    // Jika admin → masuk ke panel admin
-    if ($user && $user->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
-
-    // Jika user biasa → kembali ke home
+    
     return redirect()->route('home');
 
 })->middleware('auth')->name('dashboard');
