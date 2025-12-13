@@ -16,7 +16,13 @@ class Studio extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    public function showtimes()
+    {
+        return $this->hasMany(Showtime::class);
+    }
+    
     // Relasi ke Kursi (Satu studio punya BANYAK kursi)
+    
     public function seats(): HasMany
     {
         return $this->hasMany(Seat::class);

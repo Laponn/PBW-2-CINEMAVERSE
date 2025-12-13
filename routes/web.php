@@ -42,6 +42,10 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('movies', AdminMovieController::class);
+
+        Route::resource('branches', \App\Http\Controllers\Admin\BranchController::class);
+        Route::resource('studios', \App\Http\Controllers\Admin\StudioController::class);
+        Route::resource('showtimes', \App\Http\Controllers\Admin\ShowtimeController::class);
     });
 
 // =========================
@@ -53,5 +57,13 @@ Route::get('/dashboard', function () {
     return redirect()->route('home');
 
 })->middleware('auth')->name('dashboard');
+
+Route::post('/change-branch', function (\Illuminate\Http\Request $request) {
+    // Simpan ID cabang ke session
+    session(['selected_branch_id' => $request->branch_id]);
+    
+    // Kembali ke halaman sebelumnya
+    return redirect()->back();
+})->name('branch.change');
 
 require __DIR__.'/auth.php';
