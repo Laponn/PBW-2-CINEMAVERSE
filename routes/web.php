@@ -16,6 +16,11 @@ Route::get('/', [MovieController::class, 'index'])->name('home');
 // PERBAIKAN: Tambahkan 's' pada name agar menjadi 'movies.show' sesuai HTML
 Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movies.show');
 
+// 2) Beli Tiket (dari Home) -> tetap ke detail, tapi paksa buka jadwal
+Route::get('/movie/{id}/buy', function ($id) {
+    return redirect()->route('movies.show', ['id' => $id, 'open' => 'jadwal']);
+})->name('movies.buy');
+
 Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
 
