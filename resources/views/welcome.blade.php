@@ -9,8 +9,11 @@
 <body class="bg-[#050509] text-white font-sans">
 
     {{-- NAVBAR --}}
+   {{-- NAVBAR --}}
     <header class="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur border-b border-red-900/40">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            
+            {{-- LOGO (Tetap sama) --}}
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/40">
                     <span class="text-xs font-extrabold tracking-[0.2em]">CV</span>
@@ -21,32 +24,54 @@
                 </div>
             </div>
 
+            {{-- MENU TENGAH (Tetap sama) --}}
             <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
                 <a href="{{ route('home') }}" class="text-red-500">Home</a>
-                <a href="#now-showing" class="text-gray-300 hover:text-white">Tiket</a>
-                <a href="#" class="text-gray-300 hover:text-white">Trending</a>
-                <a href="#" class="text-gray-300 hover:text-white">Saved</a>
+                <a href="#now-showing" class="text-gray-300 hover:text-white transition">Tiket</a>
+                <a href="#" class="text-gray-300 hover:text-white transition">Trending</a>
             </nav>
 
-            <div class="flex items-center gap-3">
+            {{-- BAGIAN KANAN (SEARCH & AUTH) --}}
+            <div class="flex items-center gap-4">
+                {{-- Search Form --}}
                 <form action="{{ route('movie.search') }}" method="GET" class="hidden sm:flex items-center bg-zinc-900 rounded-full px-3 py-1.5 text-xs border border-zinc-700 focus-within:border-red-500 transition">
-                    <input type="text" name="q" placeholder="Cari judul film..." class="bg-transparent border-0 focus:ring-0 text-xs placeholder:text-zinc-500 w-32 md:w-48">
-                    <button type="submit" class="ml-2 px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 font-semibold">Cari</button>
+                    <input type="text" name="q" placeholder="Cari film..." class="bg-transparent border-0 focus:ring-0 text-xs placeholder:text-zinc-500 w-24 md:w-32 text-white">
+                    <button type="submit" class="ml-1 text-red-500 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </button>
                 </form>
                 
-                {{-- AUTH BUTTONS (Perubahan di sini) --}}
+                {{-- LOGIC AUTH (INI YANG DIUBAH AGAR ADA LOGOUT) --}}
                 @if (Route::has('login'))
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-3">
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="hidden sm:inline-flex text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400">
+                            {{-- Jika Sudah Login: Tampilkan Nama, Dashboard, & Logout --}}
+                            
+                            {{-- 1. Nama User --}}
+                            <span class="hidden lg:block text-xs font-bold text-zinc-400">
+                                Hi, {{ Auth::user()->name }}
+                            </span>
+
+                            {{-- 2. Tombol Dashboard --}}
+                            <a href="{{ url('/dashboard') }}" class="text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400 transition">
                                 Dashboard
                             </a>
+
+                            {{-- 3. Tombol Logout (Form Wajib) --}}
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="text-xs font-semibold bg-red-600 text-white rounded-full px-4 py-1.5 hover:bg-red-500 transition shadow-lg shadow-red-900/50">
+                                    Log Out
+                                </button>
+                            </form>
+
                         @else
-                            <a href="{{ route('login') }}" class="hidden sm:inline-flex text-xs font-semibold border border-zinc-600 rounded-full px-4 py-1.5 hover:border-red-500 hover:text-red-400">
+                            {{-- Jika Belum Login --}}
+                            <a href="{{ route('login') }}" class="text-xs font-semibold text-zinc-300 hover:text-white transition">
                                 Log in
                             </a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="hidden sm:inline-flex text-xs font-semibold bg-red-600 rounded-full px-4 py-1.5 hover:bg-red-500 border border-transparent">
+                                <a href="{{ route('register') }}" class="hidden sm:inline-flex text-xs font-semibold bg-white text-black rounded-full px-4 py-1.5 hover:bg-gray-200 transition">
                                     Register
                                 </a>
                             @endif
