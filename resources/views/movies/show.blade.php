@@ -211,9 +211,11 @@
 
                         {{-- CTA --}}
                         <div class="flex flex-wrap items-center gap-3 pt-2">
-                            <button id="btnToggleJadwal" type="button" aria-expanded="false" aria-controls="jadwalSection" class="inline-flex items-center justify-center px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-sm font-bold shadow-lg shadow-red-700/40 transition hover:scale-[1.02]">
+                           <a href="{{ route('tickets.show', $movie->id) }}"
+                            class="inline-flex items-center justify-center px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-sm font-bold shadow-lg shadow-red-700/40 transition hover:scale-[1.02]">
                                 Beli Tiket
-                            </button>
+                            </a>
+
                             @if($trailerId)
                                 <a href="#trailer" class="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-sm font-semibold transition">
                                     Lihat Trailer

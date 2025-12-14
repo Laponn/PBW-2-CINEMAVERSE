@@ -47,6 +47,17 @@ Route::prefix('admin')
         Route::resource('studios', \App\Http\Controllers\Admin\StudioController::class);
         Route::resource('showtimes', \App\Http\Controllers\Admin\ShowtimeController::class);
     });
+    
+// =========================
+// TICKET ROUTES
+// =========================
+Route::middleware('auth')->group(function () {
+
+    // Halaman tiket (pilih jadwal)
+    Route::get('/tickets/{movie}', [ShowtimeController::class, 'ticket'])
+        ->name('tickets.show');
+
+});
 
 // =========================
 // FIX: ROUTE DASHBOARD (BREEZE DEFAULT)

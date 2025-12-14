@@ -8,19 +8,24 @@ use Illuminate\Http\Request;
 
 class ShowtimeController extends Controller
 {
-    // Menampilkan Kursi berdasarkan ID Jadwal
-    public function show($id)
+    /**
+     * Halaman tiket – menampilkan daftar jadwal film
+     */
+    public function show($movie)
     {
-        // 1. Ambil Jadwal + Studio + Kursi Fisiknya
-        $showtime = Showtime::with(['movie', 'studio.seats'])->findOrFail($id);
-        
-        // 2. Cek Kursi mana yang sudah laku terjual (Logika Merah/Hijau)
-        $bookedSeatIds = Ticket::whereHas('booking', function ($query) use ($id) {
-            $query->where('showtime_id', $id)
-                  ->whereIn('payment_status', ['paid', 'pending']);
-        })->pluck('seat_id')->toArray();
+        $branchId = session('selected_branch_id');
 
-        // 3. Lempar ke View 'seat_selection'
-        return view('seat_selection', compact('showtime', 'bookedSeatIds'));
+        $showtimes = Showtime::with(['studio.branch'])
+            ->where('movie_id', $movie->id)
+            ->when($branchId, function ($query) use ($branchId) {
+                $query->whereHas('studio.branch', function ($q) use ($branchId) {
+                    $q->where('id', $branchId);
+                });
+            })
+            ->orderBy('start_time')
+            ->get();
+
+        return view('tiket', compact('movie', 'showtimes'));
     }
 }
+
