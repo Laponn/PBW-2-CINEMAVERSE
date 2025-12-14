@@ -37,10 +37,11 @@
     $seatCols = [1,2,3,4,5,6,7,8,9,10];
 @endphp
 
-<div class="min-h-screen flex items-center justify-center px-3 md:px-6 py-6">
+{{-- KARTU BESAR FULLSCREEN --}}
+<div class="min-h-screen w-full">
 
-    {{-- KARTU BESAR --}}
-    <div class="relative w-full max-w-6xl rounded-[32px] overflow-hidden border border-white/10 bg-black/80">
+    <div class="relative w-full min-h-screen overflow-hidden border border-white/10 bg-black/80 rounded-none">
+        {{-- isi yang lain tetap sama --}}
 
         {{-- Background poster film --}}
         <div class="absolute inset-0">
@@ -511,7 +512,7 @@
 
                         <div class="nice-scroll flex gap-4 overflow-x-auto pb-4 pt-1">
                             @foreach($otherMovies as $movie)
-                                <a href="{{ route('movie.show', $movie->id) }}"
+                                <a href="{{ route('movies.show', $movie->id) }}"
                                    class="group relative min-w-[220px] bg-black/70 border border-white/15 rounded-2xl overflow-hidden backdrop-blur-sm hover:border-red-500/70 transition">
                                     {{-- Thumbnail --}}
                                     <div class="h-28 overflow-hidden">

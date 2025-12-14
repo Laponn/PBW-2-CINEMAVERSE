@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Showtime;
-use App\Models\Ticket;
+use App\Models\Movie;
 use Illuminate\Http\Request;
 
 class ShowtimeController extends Controller
 {
-    /**
-     * Halaman tiket – menampilkan daftar jadwal film
-     */
-    public function show($movie)
+    public function ticket(Movie $movie)
     {
         $branchId = session('selected_branch_id');
 
+        // ambil semua showtime untuk film ini
         $showtimes = Showtime::with(['studio.branch'])
             ->where('movie_id', $movie->id)
             ->when($branchId, function ($query) use ($branchId) {
@@ -25,7 +23,15 @@ class ShowtimeController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return view('tiket', compact('movie', 'showtimes'));
+        // ⚠ PENTING: pakai ->get() supaya hasilnya Collection, bukan Query Builder
+        $movies = Movie::orderByRaw('id = ? desc', [$movie->id])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('usermovie.tiket', [
+            'movie'     => $movie,
+            'showtimes' => $showtimes,
+            'movies'    => $movies,
+        ]);
     }
 }
-
