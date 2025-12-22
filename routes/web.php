@@ -5,10 +5,12 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ShowtimeController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ShowtimeController as AdminShowtimeController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Branch;
+use App\Http\Controllers\Admin\SalesReportController;
 use Illuminate\Http\Request;
+use App\Models\Branch;
 
 // =========================
 // PUBLIC ROUTES
@@ -40,16 +42,19 @@ Route::middleware('auth')->group(function () {
 // ADMIN ROUTES
 // =========================
 Route::prefix('admin')
-    ->middleware(['auth'])   // ⬅ HAPUS 'role:admin' sementara untuk debugging jika perlu
+    ->middleware(['auth'])
     ->name('admin.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-        Route::resource('movies', AdminMovieController::class);
 
+        Route::resource('movies', AdminMovieController::class);
         Route::resource('branches', \App\Http\Controllers\Admin\BranchController::class);
         Route::resource('studios', \App\Http\Controllers\Admin\StudioController::class);
-        Route::resource('showtimes', \App\Http\Controllers\Admin\ShowtimeController::class);
+        Route::resource('showtimes', AdminShowtimeController::class);
+        Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
+        ->name('reports.ticket_sales');
     });
+
     
 // =========================
 // AUTH USER ROUTES
