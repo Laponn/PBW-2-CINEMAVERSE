@@ -12,6 +12,7 @@ class StudioController extends Controller
     public function index()
     {
         // Load relasi branch untuk menampilkan nama cabang di tabel
+        
         $studios = Studio::with('branch')->latest()->get();
         return view('admin.studios.index', compact('studios'));
     }
