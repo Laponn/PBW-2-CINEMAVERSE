@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ShowtimeController as AdminShowtimeController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\SalesReportController;
 
 // =========================
 // PUBLIC ROUTES
@@ -48,6 +49,8 @@ Route::prefix('admin')
         Route::resource('branches', \App\Http\Controllers\Admin\BranchController::class);
         Route::resource('studios', \App\Http\Controllers\Admin\StudioController::class);
         Route::resource('showtimes', AdminShowtimeController::class);
+        Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
+        ->name('reports.ticket_sales');
     });
 
     
