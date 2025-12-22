@@ -100,6 +100,16 @@
                                 @else
                                     <a href="{{ url('/dashboard') }}" class="text-xs font-semibold border border-zinc-600 rounded-full px-4 py-2 hover:border-red-500 hover:text-red-400 transition">Dashboard</a>
                                 @endif
+
+                                {{-- ✅ TOMBOL LIHAT PETA (TAMBAHAN) --}}
+                                <button
+                                    type="button"
+                                    onclick="document.getElementById('mapModal').classList.remove('hidden')"
+                                    class="text-xs font-semibold border border-zinc-600 rounded-full px-4 py-2 hover:border-red-500 hover:text-red-400 transition"
+                                >
+                                    🗺 Lihat Peta
+                                </button>
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="text-xs font-semibold text-zinc-400 hover:text-white transition px-2">Log Out</button>
@@ -303,6 +313,36 @@
     <footer class="border-t border-white/10 bg-black py-8 mt-12 text-center text-xs text-zinc-600">
         <p>&copy; {{ date('Y') }} CinemaVerse. All rights reserved.</p>
     </footer>
+
+    {{-- ================= MAP MODAL (SHOW) ================= --}}
+    <div id="mapModal" class="hidden fixed inset-0 z-[9999]">
+        <div
+            class="absolute inset-0 bg-black/70"
+            onclick="document.getElementById('mapModal').classList.add('hidden')"
+        ></div>
+
+        <div class="relative mx-auto mt-20 w-[900px] max-w-[95vw] rounded-2xl bg-zinc-900 text-white border border-white/10 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <div class="font-semibold">Peta Lokasi Bioskop</div>
+                <button
+                    class="text-white/70 hover:text-white"
+                    onclick="document.getElementById('mapModal').classList.add('hidden')"
+                >✕</button>
+            </div>
+
+            <div class="p-4">
+                <iframe
+                    src="https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker={{ session('branch_lat', -6.186) }}%2C{{ session('branch_lng', 106.822) }}"
+                    style="width:100%; height:520px; border:0"
+                    loading="lazy"></iframe>
+
+                <div class="mt-3 text-sm text-white/70">
+                    Lokasi saat ini:
+                    <b class="text-white">{{ $currentBranchName ?? 'Semua Lokasi' }}</b>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

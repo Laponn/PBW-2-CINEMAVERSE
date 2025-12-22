@@ -7,6 +7,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Branch;
+use Illuminate\Http\Request;
 
 // =========================
 // PUBLIC ROUTES
@@ -89,5 +91,24 @@ Route::post('/change-branch', function (\Illuminate\Http\Request $request) {
     // Kembali ke halaman sebelumnya
     return redirect()->back();
 })->name('branch.change');
+
+Route::post('/set-branch', function (Request $request) {
+    $request->validate([
+        'branch_id' => ['required', 'exists:branches,id'],
+    ]);
+
+    $branch = Branch::findOrFail($request->branch_id);
+
+    session([
+        'branch_id'   => $branch->id,
+        'branch_name' => $branch->name,
+        'branch_city' => $branch->city,
+        'branch_lat'  => (string)($branch->latitude ?? ''),
+        'branch_lng'  => (string)($branch->longitude ?? ''),
+    ]);
+
+    return response()->json(['ok' => true, 'branch' => $branch]);
+})->name('set.branch');
+
 
 require __DIR__.'/auth.php';
