@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\SalesReportController;
+use Illuminate\Http\Request;
+use App\Models\Branch;
 
 // --- PUBLIC ROUTES ---
 Route::get('/', [MovieController::class, 'index'])->name('home');
@@ -46,5 +48,24 @@ Route::post('/change-branch', function (\Illuminate\Http\Request $request) {
     session(['selected_branch_id' => $request->branch_id]);
     return redirect()->back();
 })->name('branch.change');
+
+Route::post('/set-branch', function (Request $request) {
+    $request->validate([
+        'branch_id' => ['required', 'exists:branches,id'],
+    ]);
+
+    $branch = Branch::findOrFail($request->branch_id);
+
+    session([
+        'branch_id'   => $branch->id,
+        'branch_name' => $branch->name,
+        'branch_city' => $branch->city,
+        'branch_lat'  => (string)($branch->latitude ?? ''),
+        'branch_lng'  => (string)($branch->longitude ?? ''),
+    ]);
+
+    return response()->json(['ok' => true, 'branch' => $branch]);
+})->name('set.branch');
+
 
 require __DIR__.'/auth.php';
