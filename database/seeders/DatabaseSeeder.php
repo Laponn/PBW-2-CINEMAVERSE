@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
             StudioSeeder::class,   // 1. Gedung dulu
             MovieSeeder::class,    // 2. Film
             ShowtimeSeeder::class, // 3. Jadwal
+            SeatSeeder::class,     // 4. Kursi
         ]);
+
     }
 }

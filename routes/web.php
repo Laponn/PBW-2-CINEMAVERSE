@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/booking/seats/{id}', [ShowtimeController::class, 'show'])->name('booking.seat');
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/success/{id}', [BookingController::class, 'success'])->name('booking.success');
+    Route::get('/tickets/{movie}', [ShowtimeController::class, 'ticket'])->name('tickets.show');
 });
 
 // =========================
@@ -51,14 +52,14 @@ Route::prefix('admin')
 // =========================
 // AUTH USER ROUTES
 // =========================
-Route::middleware('auth')->group(function () {
-    // pilih kursi (per showtime)
-    Route::get('/booking/seats/{id}', [ShowtimeController::class, 'show'])
-        ->name('booking.seat');
+// Route::middleware('auth')->group(function () {
+//     // pilih kursi (per showtime)
+//     Route::get('/booking/seats/{id}', [ShowtimeController::class, 'show'])
+//         ->name('booking.seat');
 
-    Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
-    Route::get('/booking/success/{id}', [BookingController::class, 'success'])->name('booking.success');
-});
+//     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
+//     Route::get('/booking/success/{id}', [BookingController::class, 'success'])->name('booking.success');
+// });
 
 // =========================
 // TICKET ROUTES
