@@ -9,6 +9,10 @@
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
+                    <a href="{{ route('booking.index') }}" class="block text-gray-300 hover:text-white transition">
+  Booking Saya
+</a>
+
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">

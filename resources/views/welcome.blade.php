@@ -29,6 +29,9 @@
             <nav class="hidden md:flex items-center gap-8 text-base font-medium">
                 <a href="{{ route('home') }}" class="text-white hover:text-red-500 transition">Home</a>
                 <a href="#now-showing" class="text-gray-300 hover:text-white transition hover:scale-105">Tiket</a>
+                    <x-nav-link :href="route('booking.index')" :active="request()->routeIs('booking.index')">
+                        {{ __('Booking Saya') }}
+                    </x-nav-link>
                 
                 {{-- DROPDOWN LOKASI (LOGIC SAMA SEPERTI SEBELUMNYA) --}}
                 <div class="relative group ml-4">

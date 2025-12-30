@@ -20,17 +20,30 @@ Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
 // --- AUTH USER ROUTES ---
 Route::middleware('auth')->group(function () {
-    // Halaman Pemesanan Utama
-Route::get('/movie/{id}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
-    
-    // API untuk ambil kursi & detail secara otomatis
+
+    // Halaman Pemesanan Utama (ticket page)
+    Route::get('/movie/{movie}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
+
+    // API untuk ambil kursi & detail showtime (studio + seats + occupied)
     Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails']);
 
-    // Proses Booking
+    // Proses Booking (create booking pending + tickets)
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
-    Route::get('/booking/success/{id}', [BookingController::class, 'success'])->name('booking.success');
-    
+
+    // Payment page + Simulasi bayar
+    Route::get('/booking/{booking}/payment', [BookingController::class, 'payment'])->name('booking.payment');
+    Route::post('/booking/{booking}/pay', [BookingController::class, 'markPaid'])->name('booking.pay');
+
+    // E-ticket page (hanya kalau paid)
+    Route::get('/booking/{booking}/ticket', [BookingController::class, 'ticket'])->name('booking.ticket');
+
+    // Backward compatibility (kalau masih ada link lama)
+    Route::get('/booking/success/{booking}', [BookingController::class, 'success'])->name('booking.success');
+
     Route::get('/dashboard', fn() => redirect()->route('home'))->name('dashboard');
+
+    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
+
 });
 
 // --- ADMIN ROUTES ---
@@ -66,6 +79,5 @@ Route::post('/set-branch', function (Request $request) {
 
     return response()->json(['ok' => true, 'branch' => $branch]);
 })->name('set.branch');
-
 
 require __DIR__.'/auth.php';

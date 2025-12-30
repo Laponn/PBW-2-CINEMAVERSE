@@ -66,7 +66,7 @@
                 <form action="{{ route('booking.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="showtime_id" id="input-showtime">
-                    <input type="hidden" name="seat_ids" id="input-seats">
+                    <div id="seat-inputs"></div>
                     <button type="submit" class="w-full bg-red-600 py-4 rounded-2xl font-bold hover:bg-red-700 transition">Checkout Sekarang</button>
                 </form>
             </div>
@@ -138,10 +138,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateSummary() {
-        document.getElementById('sum-seats').textContent = selectedSeats.length ? selectedSeats.map(s => s.name).join(', ') : '-';
-        document.getElementById('sum-total').textContent = 'Rp ' + (selectedSeats.length * selectedPrice).toLocaleString('id-ID');
-        document.getElementById('input-seats').value = selectedSeats.map(s => s.id).join(',');
-    }
+        document.getElementById('sum-seats').textContent =
+        selectedSeats.length ? selectedSeats.map(s => s.name).join(', ') : '-';
+
+        document.getElementById('sum-total').textContent ='Rp ' + (selectedSeats.length * selectedPrice).toLocaleString('id-ID');
+
+  // bikin seat_ids[] sesuai validasi Laravel
+  const wrap = document.getElementById('seat-inputs');
+  wrap.innerHTML = '';
+  selectedSeats.forEach(s => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'seat_ids[]';
+    input.value = s.id;
+    wrap.appendChild(input);
+  });
+}
+
 
     // Auto-select jika datang dari halaman detail (?time=ID)
     const urlParams = new URLSearchParams(window.location.search);
