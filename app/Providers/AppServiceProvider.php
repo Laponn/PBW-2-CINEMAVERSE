@@ -22,22 +22,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
         View::composer('*', function ($view) {
-            $branches = Branch::all();
 
-            // Cek apakah user sudah memilih cabang di session?
-            // Jika belum, default ke cabang pertama
-            $currentBranchId = Session::get('selected_branch_id', $branches->first()->id ?? null);
-            $currentBranchName = $branches->where('id', $currentBranchId)->first()->name ?? 'Pilih Lokasi';
+            $branches = Branch::orderBy('city')
+                ->orderBy('name')
+                ->get();
+
+            // Jika belum ada cabang sama sekali
+            if ($branches->isEmpty()) {
+                $view->with('globalBranches', collect())
+                     ->with('navBranches', collect())
+                     ->with('currentBranchId', null)
+                     ->with('currentBranchName', 'Pilih Lokasi');
+                return;
+            }
+
+            // Ambil cabang terpilih dari session, fallback ke cabang pertama
+            $currentBranchId = Session::get(
+                'selected_branch_id',
+                $branches->first()->id
+            );
+
+            $currentBranch = $branches->firstWhere('id', $currentBranchId);
 
             $view->with('globalBranches', $branches)
-                ->with('currentBranchId', $currentBranchId)
-                ->with('currentBranchName', $currentBranchName);
+                 ->with('navBranches', $branches)
+                 ->with('currentBranchId', $currentBranchId)
+                 ->with(
+                     'currentBranchName',
+                     $currentBranch?->name ?? 'Pilih Lokasi'
+                 );
         });
-
-        View::composer('*', function ($view) {
-        $view->with('navBranches', Branch::orderBy('city')->orderBy('name')->get());
-    });
     }
 }
