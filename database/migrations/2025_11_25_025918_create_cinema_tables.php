@@ -6,104 +6,100 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // 1. USERS (Pengguna & Admin)
-        // Tabel bawaan Laravel biasanya sudah ada, tapi pastikan kolom 'role' ada.
+        // 1. USERS
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'customer'])->default('customer'); // PENTING
+            $table->enum('role', ['admin', 'user'])->default('user'); 
             $table->rememberToken();
             $table->timestamps();
         });
 
-        // 2. BRANCHES (Cabang Bioskop)
+        // 2. BRANCHES (Menambahkan Latitude & Longitude untuk Peta)
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
-            $table->string('name');     // Misal: CinemaVerse Grand Indonesia
-            $table->string('city');     // Misal: Jakarta
-            $table->text('address');    // Alamat lengkap
+            $table->string('name');
+            $table->string('city');
+            $table->text('address');
+            $table->decimal('latitude', 10, 8)->nullable(); // Diperlukan untuk marker peta
+            $table->decimal('longitude', 11, 8)->nullable(); // Diperlukan untuk marker peta
             $table->timestamps();
         });
 
-        // 3. MOVIES (Data Film)
+        // 3. MOVIES (Termasuk kolom Genre & Trailer)
         Schema::create('movies', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->integer('duration_minutes'); // Misal: 120
+            $table->integer('duration_minutes');
             $table->date('release_date');
             $table->string('poster_url')->nullable(); 
-            $table->string('trailer_url')->nullable(); // <--- REQUEST ANDA (Link Youtube)
-            $table->enum('status', ['now_showing', 'coming_soon', 'ended']);
+            $table->string('trailer_url')->nullable(); 
+            $table->string('genre')->nullable(); // Fix error 1054
+            $table->enum('status', ['now_showing', 'coming_soon', 'ended'])->default('now_showing');
             $table->timestamps();
         });
 
-        // 4. STUDIOS (Ruang Teater)
+        // 4. STUDIOS (Termasuk Base Price)
         Schema::create('studios', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained('branches')->onDelete('cascade');
-            $table->string('name');     // Misal: Studio 1, The Premiere
-            $table->enum('type', ['regular', 'vip', 'imax']); // Kelas Studio
-            $table->decimal('base_price', 10, 2); // Harga dasar (sebelum kenaikan weekend)
-            $table->integer('capacity'); // Total kursi
+            $table->string('name');
+            $table->enum('type', ['regular', 'vip', 'imax'])->default('regular');
+            $table->decimal('base_price', 15, 2)->default(0); // Fix error 1364
+            $table->integer('capacity');
             $table->timestamps();
         });
 
-        // 5. SEATS (Denah Kursi Fisik)
+        // 5. SEATS
         Schema::create('seats', function (Blueprint $table) {
             $table->id();
             $table->foreignId('studio_id')->constrained('studios')->onDelete('cascade');
-            $table->string('row_label');   // A, B, C
-            $table->integer('seat_number'); // 1, 2, 3
-            $table->boolean('is_usable')->default(true); // FALSE = Rusak/Maintenance
+            $table->string('row_label');
+            $table->integer('seat_number');
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
         });
 
-        // 6. SHOWTIMES (Jadwal Tayang)
+        // 6. SHOWTIMES
         Schema::create('showtimes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('movie_id')->constrained('movies')->onDelete('cascade');
             $table->foreignId('studio_id')->constrained('studios')->onDelete('cascade');
-            $table->dateTime('start_time'); // 2023-10-25 14:00:00
-            $table->dateTime('end_time');   // start_time + durasi + cleaning
-            $table->decimal('price', 10, 2); // Harga Final (Bisa override base_price studio)
+            $table->dateTime('start_time');
+            $table->dateTime('end_time')->nullable(); // Bisa dikosongkan jika seeder belum menghitung durasi
+            $table->decimal('price', 15, 2);
             $table->timestamps();
         });
 
-
-        
-        // 7. BOOKINGS (Transaksi / Invoice)
+        // 7. BOOKINGS
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('showtime_id')->constrained('showtimes'); // Link ke jadwal
-            $table->string('booking_code')->unique(); // Kode unik (misal: CNV-8821)
-            $table->decimal('total_price', 10, 2);
-            $table->enum('payment_status', ['pending', 'paid', 'cancelled', 'expired']);
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('showtime_id')->constrained('showtimes')->onDelete('cascade');
+            $table->string('booking_code')->unique();
+            $table->decimal('total_price', 15, 2);
+            $table->enum('payment_status', ['pending', 'paid', 'cancelled', 'expired'])->default('pending');
             $table->timestamps();
         });
 
-        // 8. TICKETS (Detail Item Kursi per Transaksi)
+        // 8. TICKETS
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained('bookings')->onDelete('cascade');
-            $table->foreignId('seat_id')->constrained('seats'); // KUNCI: Kursi ini diambil siapa
-            $table->decimal('price', 10, 2); // Harga per kursi saat itu (History)
+            $table->foreignId('seat_id')->constrained('seats')->onDelete('cascade');
+            $table->decimal('price', 15, 2);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        // Hapus tabel harus urutan terbalik dari pembuatan (Child dulu baru Parent)
         Schema::dropIfExists('tickets');
         Schema::dropIfExists('bookings');
         Schema::dropIfExists('showtimes');
@@ -113,5 +109,4 @@ return new class extends Migration
         Schema::dropIfExists('branches');
         Schema::dropIfExists('users');
     }
-    
 };

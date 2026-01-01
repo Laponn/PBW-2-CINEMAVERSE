@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function bookings()
+    {
+        // Seorang user memiliki banyak booking (Has Many)
+        return $this->hasMany(Booking::class)->latest();
+    }
 }

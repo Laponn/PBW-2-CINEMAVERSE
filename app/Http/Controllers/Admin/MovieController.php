@@ -8,94 +8,98 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
+
 class MovieController extends Controller
 {
-    // Helper kecil buat cek admin
-    private function ensureAdmin()
+    // Menggunakan middleware di constructor lebih rapi daripada memanggil ensureAdmin di tiap fungsi
+    public function __construct()
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
-        }
+        $this->middleware(function ($request, $next) {
+            if (!Auth::check() || Auth::user()->role !== 'admin') {
+                abort(403, 'Unauthorized - Anda bukan admin CinemaVerse');
+            }
+            return $next($request);
+        });
     }
 
     public function index()
     {
-        $this->ensureAdmin();
-
         $movies = Movie::latest()->get();
         return view('admin.movies.index', compact('movies'));
     }
 
     public function create()
     {
-        $this->ensureAdmin();
-
         return view('admin.movies.create');
     }
 
     public function store(Request $request)
     {
-        $this->ensureAdmin();
-
-        $request->validate([
-            'title'             => 'required',
-            'description'       => 'required',
-            'duration_minutes'  => 'required|integer',
-            'poster'            => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'status'            => 'required',
+        $validated = $request->validate([
+            'title'            => 'required|string|max:255',
+            'description'      => 'required',
+            'duration_minutes' => 'required|integer',
+            'genre'            => 'nullable|string',
+            'poster'           => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'status'           => 'required|in:now_showing,coming_soon,ended',
+            'trailer_url'      => 'nullable|string',
         ]);
 
-        $posterPath = null;
         if ($request->hasFile('poster')) {
-            $posterPath = $request->file('poster')->store('posters', 'public');
+            $path = $request->file('poster')->store('posters', 'public');
+            $validated['poster_url'] = '/storage/' . $path;
         }
 
-        Movie::create([
-            'title'            => $request->title,
-            'description'      => $request->description,
-            'duration_minutes' => $request->duration_minutes,
-            'release_date'     => now(),
-            'poster_url'       => $posterPath ? '/storage/' . $posterPath : null,
-            'trailer_url'      => $request->trailer_url,
-            'status'           => $request->status,
-        ]);
+        // Simpan data (release_date otomatis diatur ke hari ini)
+        $validated['release_date'] = now();
+        Movie::create($validated);
 
-        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil disimpan!');
+        return redirect()->route('admin.movies.index')->with('success', 'Film baru berhasil ditambahkan!');
     }
 
     public function edit(Movie $movie)
     {
-        $this->ensureAdmin();
-
         return view('admin.movies.edit', compact('movie'));
     }
 
     public function update(Request $request, Movie $movie)
     {
-        $this->ensureAdmin();
-
-        $request->validate([
-            'title'  => 'required',
-            'poster' => 'nullable|image|max:2048',
+        $validated = $request->validate([
+            'title'            => 'required|string|max:255',
+            'description'      => 'required',
+            'duration_minutes' => 'required|integer',
+            'genre'            => 'nullable|string',
+            'poster'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'status'           => 'required|in:now_showing,coming_soon,ended',
+            'trailer_url'      => 'nullable|string',
         ]);
 
-        $data = $request->all();
-
         if ($request->hasFile('poster')) {
+            // Hapus file lama jika ada di storage lokal
+            if ($movie->poster_url && !str_starts_with($movie->poster_url, 'http')) {
+                $oldPath = str_replace('/storage/', '', $movie->poster_url);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            // Simpan poster baru
             $path = $request->file('poster')->store('posters', 'public');
-            $data['poster_url'] = '/storage/' . $path;
+            $validated['poster_url'] = '/storage/' . $path;
         }
 
-        $movie->update($data);
+        // Update semua data yang sudah divalidasi
+        $movie->update($validated);
 
-        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil diupdate!');
+        return redirect()->route('admin.movies.index')->with('success', 'Data film "' . $movie->title . '" berhasil diperbarui!');
     }
 
     public function destroy(Movie $movie)
     {
-        $this->ensureAdmin();
+        if ($movie->poster_url && !str_starts_with($movie->poster_url, 'http')) {
+            $path = str_replace('/storage/', '', $movie->poster_url);
+            Storage::disk('public')->delete($path);
+        }
 
         $movie->delete();
-        return redirect()->route('admin.movies.index')->with('success', 'Film dihapus!');
+        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil dihapus dari katalog.');
     }
 }

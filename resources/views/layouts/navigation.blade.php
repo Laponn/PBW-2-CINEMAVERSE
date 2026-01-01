@@ -1,255 +1,102 @@
 {{-- resources/views/layouts/navigation.blade.php --}}
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-
-            {{-- LEFT --}}
-            <div class="flex">
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                    <a href="{{ route('booking.index') }}" class="block text-gray-300 hover:text-white transition">
-  Booking Saya
-</a>
-
+<nav x-data="{ open: false }" class="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10 h-20">
+    <div class="w-full h-full px-6 flex items-center justify-between">
+        
+        {{-- KIRI: Logo & Navigasi Utama --}}
+        <div class="flex items-center gap-8 w-1/3">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)] group-hover:scale-110 transition">
+                    <span class="text-xs font-black text-white">CV</span>
                 </div>
-
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                <div class="hidden lg:flex flex-col leading-none">
+                    <span class="text-[8px] tracking-[0.4em] text-red-500 font-bold uppercase">Cinema</span>
+                    <span class="text-xl font-black tracking-widest text-white">VERSE</span>
                 </div>
+            </a>
+
+            <div class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest">
+                <a href="/" class="text-white hover:text-red-500 transition">Home</a>
+                <a href="{{ route('booking.index') }}" class="text-zinc-400 hover:text-white transition">Tiket Saya</a>
             </div>
+        </div>
 
-            {{-- RIGHT (DESKTOP) --}}
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-
-                {{-- 📍 PILIH LOKASI (OPEN MODAL) --}}
-                <button
-                    type="button"
+        {{-- TENGAH: Tombol Lokasi (Diperbaiki ke Tengah dengan Oval Merah) --}}
+        <div class="flex justify-center w-1/3">
+            <div class="bg-red-600/20 p-1 rounded-full border border-red-600/30">
+                <button type="button" 
                     onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'branch-modal' }))"
-                    class="me-3 inline-flex items-center px-4 py-2 bg-gray-900 border border-gray-700 rounded-full text-xs text-white uppercase tracking-widest hover:bg-gray-800"
-                >
-                    <span class="me-2">📍</span>
-                    <span id="branchLabel">{{ session('branch_name', 'Pilih Lokasi') }}</span>
-                    <span class="ms-2 opacity-70">▾</span>
-                </button>
-
-                {{-- 🗺 LIHAT PETA (OPEN MAP MODAL) --}}
-                <button
-                    type="button"
-                    onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'map-modal' }))"
-                    class="me-4 inline-flex items-center px-4 py-2 bg-blue-600 border border-blue-500 rounded-full text-xs text-white uppercase tracking-widest hover:bg-blue-500"
-                >
-                    🗺 Lihat Peta
-                </button>
-
-                {{-- USER DROPDOWN --}}
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 transition">
-                            <div>{{ Auth::user()->name }}</div>
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            {{-- HAMBURGER --}}
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = !open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:bg-gray-100 transition">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }"
-                            class="inline-flex" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }"
-                            class="hidden" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    class="px-6 py-2 bg-red-600 rounded-full text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-red-700 transition flex items-center gap-2 shadow-lg shadow-red-600/40">
+                    <span class="animate-pulse">📍</span>
+                    <span>{{ session('branch_name', 'Pilih Lokasi') }}</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="4"/></svg>
                 </button>
             </div>
         </div>
+
+        {{-- KANAN: Search & User Avatar Dropdown --}}
+       {{-- KANAN: Search & User Avatar Dropdown --}}
+<div class="flex items-center justify-end gap-6 w-1/3">
+    {{-- Search Bar --}}
+    <form action="{{ route('movie.search') }}" class="relative hidden xl:block">
+        <input type="text" name="q" placeholder="Cari film..." 
+            class="bg-zinc-900 border border-zinc-800 text-white text-[10px] rounded-full pl-5 pr-10 py-2 w-48 focus:border-red-600 focus:ring-0 transition">
+        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M19 11a8 8 0 11-16 0 8 8 0 0116 0z" stroke-width="2"/></svg>
+        </button>
+    </form>
+
+    @auth
+        {{-- TEKS SELAMAT DATANG (DITAMBAHKAN) --}}
+     <div class="hidden sm:flex flex-col text-right leading-tight mr-2">
+        {{-- Ukuran diperbesar ke text-[10px] dan warna lebih terang ke zinc-400 --}}
+        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Selamat Datang</span>
+        {{-- Nama User dibuat lebih menonjol --}}
+        <span class="text-sm font-black text-white tracking-wide">{{ Auth::user()->name }}</span>
     </div>
 
-    {{-- MOBILE MENU --}}
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-
-            {{-- 📍 PILIH LOKASI (MOBILE) --}}
-            <div class="px-4 pt-2">
-                <button
-                    type="button"
-                    onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'branch-modal' }))"
-                    class="w-full inline-flex items-center justify-between px-4 py-2 bg-gray-900 border border-gray-700 rounded-full text-xs text-white uppercase tracking-widest hover:bg-gray-800"
-                >
-                    <span class="inline-flex items-center">
-                        <span class="me-2">📍</span>
-                        <span id="branchLabelMobile">{{ session('branch_name', 'Pilih Lokasi') }}</span>
-                    </span>
-                    <span class="opacity-70">▾</span>
+        {{-- User Dropdown --}}
+        <x-dropdown align="right" width="48">
+            <x-slot name="trigger">
+                <button class="flex items-center transition duration-150 ease-in-out">
+                    {{-- Avatar Lingkaran Nama --}}
+                    <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-red-500 font-black hover:border-red-500 transition shadow-lg">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
                 </button>
-            </div>
+            </x-slot>
+            {{-- ... slot content tetap sama ... --}}
+            <x-slot name="content">
+                <div class="px-4 py-2 border-b border-zinc-800">
+                    <p class="text-[10px] text-zinc-500 uppercase">Selamat Datang</p>
+                    <p class="text-sm font-bold text-white">{{ Auth::user()->name }}</p>
+                </div>
 
-            {{-- 🗺 LIHAT PETA (MOBILE) --}}
-            <div class="px-4 pt-2">
-                <button
-                    type="button"
-                    onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'map-modal' }))"
-                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-blue-500 rounded-full text-xs text-white uppercase tracking-widest hover:bg-blue-500"
-                >
-                    🗺 Lihat Peta
-                </button>
-            </div>
+                <x-dropdown-link :href="route('dashboard')">
+                    👤 Dashboard Saya 
+                </x-dropdown-link>
+
+                @if(Auth::user()->role === 'admin')
+                    <x-dropdown-link :href="route('admin.dashboard')" class="text-red-500 font-bold">
+                        🛡️ Admin Panel
+                    </x-dropdown-link>
+                @endif
+
+                <hr class="border-zinc-800">
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                        🚪 Keluar
+                    </x-dropdown-link>
+                </form>
+            </x-slot>
+        </x-dropdown>
+    @else
+        <div class="flex items-center gap-4">
+            <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition">Masuk</a>
+            <a href="{{ route('register') }}" class="px-5 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-zinc-200 transition">Daftar</a>
         </div>
+    @endauth
+</div>
     </div>
 </nav>
-
-{{-- ================= MODAL OSM (PILIH CABANG) ================= --}}
-<x-modal name="branch-modal" :show="false" focusable>
-    <div class="p-6 bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Pilih Lokasi Bioskop</h2>
-            <button
-                type="button"
-                class="text-gray-500 hover:text-black"
-                onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'branch-modal' }))"
-            >
-                ✕
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {{-- LIST CABANG --}}
-            <div id="branchList" class="space-y-2 max-h-[360px] overflow-auto">
-                @foreach(($navBranches ?? collect()) as $b)
-                    @php
-                        $lat = $b->latitude ?? -6.186;
-                        $lng = $b->longitude ?? 106.822;
-                        $embed = "https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker={$lat}%2C{$lng}";
-                    @endphp
-
-                    <button
-                        type="button"
-                        class="w-full text-left p-3 border rounded hover:bg-gray-100"
-                        data-id="{{ $b->id }}"
-                        data-name="{{ $b->name }}"
-                        data-embed="{{ $embed }}"
-                    >
-                        <div class="font-semibold">{{ $b->city }}</div>
-                        <div class="text-sm text-gray-500">{{ $b->name }}</div>
-                    </button>
-                @endforeach
-            </div>
-
-            {{-- MAP OSM --}}
-            <div class="md:col-span-2 border rounded overflow-hidden">
-                <iframe
-                    id="osmFrame"
-                    src="https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker={{ session('branch_lat', -6.186) }}%2C{{ session('branch_lng', 106.822) }}"
-                    style="width:100%; height:360px; border:0"
-                    loading="lazy">
-                </iframe>
-            </div>
-        </div>
-
-        <p class="text-sm text-gray-500 mt-3">
-            Klik cabang di kiri untuk mengubah lokasi.
-        </p>
-    </div>
-</x-modal>
-
-{{-- ================= MODAL MAP SAJA (LIHAT PETA) ================= --}}
-<x-modal name="map-modal" :show="false" focusable>
-    <div class="p-6 bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Peta Lokasi Bioskop</h2>
-            <button
-                type="button"
-                class="text-gray-500 hover:text-black"
-                onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'map-modal' }))"
-            >
-                ✕
-            </button>
-        </div>
-
-        <div class="border rounded overflow-hidden">
-            <iframe
-                src="https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker={{ session('branch_lat', -6.186) }}%2C{{ session('branch_lng', 106.822) }}"
-                style="width:100%; height:460px; border:0"
-                loading="lazy">
-            </iframe>
-        </div>
-
-        <p class="text-sm text-gray-500 mt-3">
-            Lokasi saat ini: <b>{{ session('branch_name', 'Belum dipilih') }}</b>
-        </p>
-    </div>
-</x-modal>
-
-{{-- ================= SCRIPT ================= --}}
-<script>
-document.addEventListener('click', async function (e) {
-    const btn = e.target.closest('#branchList button');
-    if (!btn) return;
-
-    const branchId = btn.dataset.id;
-    const name = btn.dataset.name;
-    const embed = btn.dataset.embed;
-
-    const frame = document.getElementById('osmFrame');
-    if (frame) frame.src = embed;
-
-    const url = "{{ \Illuminate\Support\Facades\Route::has('set.branch') ? route('set.branch') : '' }}";
-    if (!url) {
-        alert("Route set.branch belum ada di routes/web.php");
-        return;
-    }
-
-    const res = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify({ branch_id: branchId })
-    });
-
-    if (!res.ok) {
-        alert("Gagal menyimpan lokasi. Cek routes/web.php & controller/route set.branch.");
-        return;
-    }
-
-    const labelDesktop = document.getElementById('branchLabel');
-    if (labelDesktop) labelDesktop.textContent = name;
-
-    const labelMobile = document.getElementById('branchLabelMobile');
-    if (labelMobile) labelMobile.textContent = name;
-
-    window.dispatchEvent(new CustomEvent('close-modal', { detail: 'branch-modal' }));
-    window.location.reload();
-});
-</script>

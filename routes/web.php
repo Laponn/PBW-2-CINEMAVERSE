@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\SalesReportController;
 use Illuminate\Http\Request;
 use App\Models\Branch;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 
 // --- PUBLIC ROUTES ---
 Route::get('/', [MovieController::class, 'index'])->name('home');
@@ -20,12 +22,13 @@ Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
 // --- AUTH USER ROUTES ---
 Route::middleware('auth')->group(function () {
-
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // Halaman Pemesanan Utama (ticket page)
-    Route::get('/movie/{movie}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
-
-    // API untuk ambil kursi & detail showtime (studio + seats + occupied)
-    Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails']);
+ Route::get('/movie/{movie}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
+Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails']);
 
     // Proses Booking (create booking pending + tickets)
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
@@ -36,11 +39,11 @@ Route::middleware('auth')->group(function () {
 
     // E-ticket page (hanya kalau paid)
     Route::get('/booking/{booking}/ticket', [BookingController::class, 'ticket'])->name('booking.ticket');
-
+Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
     // Backward compatibility (kalau masih ada link lama)
     Route::get('/booking/success/{booking}', [BookingController::class, 'success'])->name('booking.success');
 
-    Route::get('/dashboard', fn() => redirect()->route('home'))->name('dashboard');
+  
 
     Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
 

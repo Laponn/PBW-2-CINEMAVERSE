@@ -127,5 +127,15 @@ class BookingController extends Controller
 
     return view('booking.index', compact('bookings', 'status'));
     }
+    public function show($id)
+{
+    $booking = \App\Models\Booking::with([
+        'showtime.movie', 
+        'showtime.studio.branch', 
+        'tickets.seat'
+    ])->where('user_id', auth()->id())->findOrFail($id);
+
+    return view('user.booking-details', compact('booking'));
+}
 }
 

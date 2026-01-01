@@ -13,24 +13,25 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Hanya admin yang boleh
-       if (!Auth::check() || Auth::user()->role !== 'admin') {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
             abort(403, 'Unauthorized');
         }
 
-        // Hitung Data
+        // Data untuk Kartu Statistik
         $totalMovies   = Movie::count();
         $totalEarnings = Booking::where('payment_status', 'paid')->sum('total_price');
-        
-        // Data Baru
         $totalBranches = Branch::count();
         $totalStudios  = Studio::count();
+
+        // Ambil 5 film terbaru saja (untuk ringkasan, bukan index)
+        $movies = Movie::latest()->take(5)->get(); 
 
         return view('admin.dashboard', compact(
             'totalMovies', 
             'totalEarnings', 
             'totalBranches', 
-            'totalStudios'
+            'totalStudios',
+            'movies'
         ));
     }
 }

@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 
 class Booking extends Model
 {
     // Biar gampang (mass assignment aman)
-    protected $guarded = ['id'];
+   protected $fillable = ['user_id', 'showtime_id', 'booking_code', 'total_price', 'payment_status'];
 
     /**
      * Booking ini milik user siapa

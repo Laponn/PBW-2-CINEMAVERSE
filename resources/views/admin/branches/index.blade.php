@@ -20,8 +20,8 @@
             <tr>
                 <th class="px-6 py-3">Nama Cabang</th>
                 <th class="px-6 py-3">Kota</th>
-                {{-- Menambahkan Kolom Alamat --}}
                 <th class="px-6 py-3">Alamat</th>
+                <th class="px-6 py-3">Koordinat (Lat, Lng)</th>
                 <th class="px-6 py-3 text-center">Aksi</th>
             </tr>
         </thead>
@@ -30,13 +30,21 @@
             <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 font-bold text-gray-800">{{ $branch->name }}</td>
                 <td class="px-6 py-4">{{ $branch->city }}</td>
-                {{-- Menampilkan Data Alamat --}}
-                <td class="px-6 py-4 text-sm text-gray-600">{{ Str::limit($branch->address, 50) }}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ Str::limit($branch->address, 30) }}</td>
+                <td class="px-6 py-4 text-xs font-mono text-blue-600">
+                    @if($branch->latitude && $branch->longitude)
+                        {{ $branch->latitude }}, {{ $branch->longitude }}
+                    @else
+                        <span class="text-red-500 italic">Belum diset</span>
+                    @endif
+                </td>
+                {{-- Bagian tombol Aksi yang sebelumnya hilang --}}
                 <td class="px-6 py-4 text-center space-x-2 whitespace-nowrap">
                     <a href="{{ route('admin.branches.edit', $branch->id) }}" class="text-blue-600 hover:text-blue-900 font-bold text-sm">Edit</a>
                     
                     <form action="{{ route('admin.branches.destroy', $branch->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus cabang ini? Studio di dalamnya juga akan terhapus!');">
-                        @csrf @method('DELETE')
+                        @csrf 
+                        @method('DELETE')
                         <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-sm">Hapus</button>
                     </form>
                 </td>

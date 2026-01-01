@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seat extends Model
 {
-    protected $guarded = ['id'];
+  protected $fillable = ['studio_id', 'row_label', 'seat_number', 'is_usable'];
 
     protected $casts = [
         'is_usable' => 'boolean',

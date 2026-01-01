@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         // Jika ADA: Update datanya (password/nama/role).
         // Jika TIDAK ADA: Buat baru.
         User::updateOrCreate(
-            ['email' => 'admin@example.com'], // Kunci pencarian (Search Key)
+            ['email' => 'admin@cv.com'], // Kunci pencarian (Search Key)
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
@@ -25,9 +25,9 @@ class UserSeeder extends Seeder
 
         // 2. Akun User Biasa
         User::updateOrCreate(
-            ['email' => 'user@cinemaverse.com'], // Kunci pencarian
+            ['email' => 'pal@cv.com'], // Kunci pencarian
             [
-                'name' => 'Budi Customer',
+                'name' => 'Karbito Customer',
                 'password' => Hash::make('password'),
                 'role' => 'customer',
             ]

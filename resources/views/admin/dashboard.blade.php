@@ -1,101 +1,84 @@
 @extends('layouts.admin')
 
 @section('content')
-    {{-- HEADER: Judul & Tombol Home --}}
-    <div class="flex items-center justify-between mb-8">
+<div class="space-y-8 pb-12">
+    {{-- HEADER: Abu-abu Muda dengan Garis Tepi --}}
+    <div class="bg-gray-50 p-8 rounded-[2rem] border border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-            <h2 class="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
-            <p class="text-gray-500 text-sm mt-1">Selamat datang kembali, Admin!</p>
+            <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900">
+                Dashboard <span class="text-red-600">Overview</span>
+            </h2>
+            <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                Selamat datang kembali, {{ Auth::user()->name }}
+            </p>
         </div>
 
-        {{-- Tombol Kembali ke Home --}}
         <a href="{{ route('home') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition shadow-md group">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Kembali ke Home
+           class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-700 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-gray-100 transition shadow-sm">
+            Kembali ke Beranda
         </a>
     </div>
 
-    {{-- KONTEN STATISTIK --}}
-    {{-- Dibuat jadi 5 kolom di layar besar supaya card "Laporan Tiket" muat --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
+    {{-- KONTEN STATISTIK: Kartu Putih dengan Garis Abu-abu --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @php
+            $stats = [
+                ['label' => 'Total Pendapatan', 'value' => 'Rp ' . number_format($totalEarnings, 0, ',', '.'), 'color' => 'text-green-600', 'border' => 'border-green-200'],
+                ['label' => 'Katalog Film', 'value' => $totalMovies, 'color' => 'text-red-600', 'border' => 'border-red-200'],
+                ['label' => 'Total Cabang', 'value' => $totalBranches, 'color' => 'text-blue-600', 'border' => 'border-blue-200'],
+                ['label' => 'Total Studio', 'value' => $totalStudios, 'color' => 'text-purple-600', 'border' => 'border-purple-200'],
+            ];
+        @endphp
 
-        {{-- 1. Total Pendapatan --}}
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-green-500 relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Pendapatan</h3>
-                <p class="text-2xl font-extrabold text-gray-800 mt-2">Rp {{ number_format($totalEarnings) }}</p>
-            </div>
-            <div class="absolute right-4 top-4 text-green-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
+        @foreach($stats as $stat)
+        <div class="bg-white p-8 rounded-[2rem] border-2 {{ $stat['border'] }} shadow-sm">
+            <h3 class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2">{{ $stat['label'] }}</h3>
+            <p class="text-2xl font-black {{ $stat['color'] }} italic tracking-tighter">{{ $stat['value'] }}</p>
         </div>
-
-        {{-- 2. Total Film --}}
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500 relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Film</h3>
-                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $totalMovies }}</p>
-            </div>
-            <div class="absolute right-4 top-4 text-blue-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                </svg>
-            </div>
-        </div>
-
-        {{-- 3. Total Cabang --}}
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-orange-500 relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Cabang</h3>
-                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $totalBranches }}</p>
-            </div>
-            <div class="absolute right-4 top-4 text-orange-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-            </div>
-        </div>
-
-        {{-- 4. Total Studio --}}
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500 relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Studio</h3>
-                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ $totalStudios }}</p>
-            </div>
-            <div class="absolute right-4 top-4 text-purple-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-            </div>
-        </div>
-
-        {{-- 5. Shortcut: Laporan Penjualan Tiket (Tiket Sales) --}}
-        <a href="{{ route('admin.reports.ticket_sales') }}"
-           class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-fuchsia-500 relative overflow-hidden hover:shadow-md transition">
-            <div class="relative z-10">
-                <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Tiket Sales</h3>
-                <p class="text-lg font-extrabold text-gray-800 mt-2">Laporan Penjualan</p>
-                <p class="text-xs text-gray-500 mt-1">Paid / Unpaid + filter tanggal</p>
-            </div>
-            <div class="absolute right-4 top-4 text-fuchsia-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-            </div>
-        </a>
-
+        @endforeach
     </div>
+
+    {{-- TABEL RINGKASAN: Putih dengan Border Tegas --}}
+    <div class="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-8 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+            <h3 class="text-lg font-black uppercase italic tracking-tighter text-gray-900">
+                Update <span class="text-red-600">Katalog</span>
+            </h3>
+            <a href="{{ route('admin.movies.index') }}" class="text-[10px] font-black uppercase text-gray-400 hover:text-red-600 transition">Lihat Semua →</a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] font-black tracking-widest border-b border-gray-200">
+                    <tr>
+                        <th class="px-8 py-4">Judul Film</th>
+                        <th class="px-8 py-4 text-center">Status</th>
+                        <th class="px-8 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($movies as $movie)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-8 py-5">
+                            <span class="font-bold text-gray-800 uppercase italic text-sm tracking-tight">{{ $movie->title }}</span>
+                        </td>
+                        <td class="px-8 py-5 text-center">
+                            <span class="px-4 py-1 rounded-full bg-gray-100 border border-gray-200 text-[8px] font-black uppercase text-gray-500">
+                                {{ str_replace('_', ' ', $movie->status) }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <a href="{{ route('admin.movies.edit', $movie->id) }}" class="text-[10px] font-black text-red-600 uppercase hover:underline italic">Edit</a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="px-8 py-12 text-center text-gray-400 text-xs italic font-medium">Belum ada data film terbaru.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 @endsection

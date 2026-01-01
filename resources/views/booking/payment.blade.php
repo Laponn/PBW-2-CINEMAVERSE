@@ -1,64 +1,55 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pembayaran - {{ $booking->booking_code }}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-[#05070b] text-white min-h-screen flex items-center justify-center p-6">
-  <div class="w-full max-w-lg bg-black/70 border border-white/10 rounded-3xl p-6 space-y-4">
-    <div class="flex justify-between items-start gap-3">
-      <div>
-        <div class="text-xs text-gray-400 uppercase tracking-[0.25em]">Payment</div>
-        <div class="text-xl font-bold">{{ $booking->booking_code }}</div>
-        <div class="text-sm text-gray-300">
-          {{ $booking->showtime->movie->title }} • {{ \Carbon\Carbon::parse($booking->showtime->start_time)->format('d M Y H:i') }}
+{{-- resources/views/booking/payment.blade.php --}}
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen flex items-center justify-center p-6 py-20">
+    <div class="w-full max-w-lg relative">
+        {{-- Glow Effect --}}
+        <div class="absolute -inset-4 bg-red-600/20 blur-3xl rounded-full opacity-50"></div>
+
+        <div class="relative bg-zinc-950 border border-white/10 rounded-[2.5rem] p-8 space-y-8 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="text-[10px] text-red-500 font-black uppercase tracking-[0.4em]">Payment Simulation</div>
+                <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase">{{ $booking->booking_code }}</h2>
+            </div>
+
+            <div class="bg-zinc-900/50 rounded-3xl p-6 border border-white/5 space-y-4 text-center">
+                <p class="text-xs text-zinc-500 font-bold uppercase tracking-widest">Silakan Scan QR Berikut</p>
+                <div class="bg-white p-4 rounded-2xl inline-block shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+                    <img class="w-48 h-48" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode("PAY:{$booking->booking_code}") }}">
+                </div>
+                <div class="pt-4 border-t border-white/5">
+                    <p class="text-[10px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-1">Total Pembayaran</p>
+                    <p class="text-3xl font-black text-white italic">Rp{{ number_format($booking->total_price,0,',','.') }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 px-2">
+                    <span>Film</span>
+                    <span class="text-white">{{ $booking->showtime->movie->title }}</span>
+                </div>
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 px-2">
+                    <span>Jadwal</span>
+                    <span class="text-white">{{ \Carbon\Carbon::parse($booking->showtime->start_time)->format('d M, H:i') }}</span>
+                </div>
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-400 px-2">
+                    <span>Kursi</span>
+                    <span class="text-red-500 font-black italic">{{ $booking->tickets->map(fn($t) => $t->seat->label)->join(', ') }}</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('booking.pay', $booking->id) }}">
+                @csrf
+                <button class="w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all transform hover:scale-[1.02] shadow-xl shadow-red-600/30">
+                    Konfirmasi Pembayaran
+                </button>
+            </form>
+
+            <a href="{{ route('booking.index') }}" class="block text-center text-[10px] font-black text-zinc-600 hover:text-white uppercase tracking-widest transition">
+                ← Batalkan Pembayaran
+            </a>
         </div>
-        <div class="text-sm text-gray-400">
-          {{ $booking->showtime->studio->name }} • {{ $booking->showtime->studio->branch->name }}
-        </div>
-      </div>
-      <div class="text-right">
-        <div class="text-xs text-gray-400">Status</div>
-        <div class="font-semibold {{ $booking->payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400' }}">
-          {{ strtoupper($booking->payment_status) }}
-        </div>
-      </div>
     </div>
-
-    <div class="text-sm">
-      <div class="text-gray-400">Kursi</div>
-      <div class="font-semibold text-red-400">
-        {{ $booking->tickets->map(fn($t) => $t->seat->label)->join(', ') }}
-      </div>
-    </div>
-
-    <div class="flex justify-between text-lg font-bold border-t border-white/10 pt-4">
-      <span>Total</span>
-      <span class="text-red-400">Rp{{ number_format($booking->total_price,0,',','.') }}</span>
-    </div>
-
-    @php
-      $qrPayload = "BOOKING:{$booking->booking_code}|TOTAL:{$booking->total_price}";
-    @endphp
-
-    <div class="bg-white rounded-2xl p-4 flex items-center justify-center">
-      <img
-        alt="QR Payment"
-        src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ urlencode($qrPayload) }}">
-    </div>
-
-    <form method="POST" action="{{ route('booking.pay', $booking->id) }}">
-      @csrf
-      <button class="w-full bg-red-600 hover:bg-red-700 py-3 rounded-full font-semibold">
-        Saya sudah bayar (Simulasi)
-      </button>
-    </form>
-
-    <a href="{{ route('movies.ticket', $booking->showtime->movie_id) }}" class="block text-center text-sm text-gray-400 hover:text-white">
-      Kembali
-    </a>
-  </div>
-</body>
-</html>
+</div>
+@endsection

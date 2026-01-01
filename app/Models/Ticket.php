@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Ticket extends Model
 {
     // Biar Ticket::create() jalan
-    protected $guarded = ['id'];
+    protected $fillable = ['booking_id', 'seat_id', 'price'];
 
     /**
      * Tiket ini milik booking apa

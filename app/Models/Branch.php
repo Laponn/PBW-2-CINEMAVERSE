@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Branch extends Model
 {
     //
-    protected $guarded = ['id'];
+
+    protected $fillable = ['name', 'city', 'address', 'latitude', 'longitude'];
+
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+    ];
 
     // Satu cabang punya banyak studio
     public function studios()

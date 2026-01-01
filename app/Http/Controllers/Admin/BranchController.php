@@ -26,6 +26,8 @@ class BranchController extends Controller
             'name'    => 'required|string|max:255',
             'city'    => 'required|string|max:255',
             'address' => 'required|string', 
+            'latitude'  => 'nullable|numeric', // Validasi angka
+        'longitude' => 'nullable|numeric',
         ]);
 
         Branch::create($request->all());
@@ -45,6 +47,8 @@ class BranchController extends Controller
             'name'    => 'required|string|max:255',
             'city'    => 'required|string|max:255',
             'address' => 'required|string',
+            'latitude'  => 'nullable|numeric', // Validasi angka
+        'longitude' => 'nullable|numeric',
         ]);
 
         $branch->update($request->all());
