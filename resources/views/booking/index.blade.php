@@ -87,6 +87,11 @@
                                    class="w-full lg:w-auto px-8 py-3 rounded-full bg-zinc-800 hover:bg-white hover:text-black text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10">
                                    Lihat Tiket
                                 </a>
+
+                                <a href="{{ route('booking.ticket.download', $b->id) }}"
+                                   class="w-full lg:w-auto px-8 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-600/25">
+                                   Download Tiket
+                                </a>
                             @endif
                         </div>
                     </div>

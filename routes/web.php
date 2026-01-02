@@ -31,6 +31,34 @@ Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
 /*
 |--------------------------------------------------------------------------
+
+| MIDTRANS AUTH TEST (DEBUG) - LOCAL ONLY
+|--------------------------------------------------------------------------
+| Hasil yang diharapkan:
+| - 404 / transaction doesn't exist  => key VALID (auth sukses)
+| - 401 Unknown Merchant             => key SALAH / bukan sandbox merchant tsb
+|
+| Hapus route ini setelah beres.
+*/
+if (app()->environment('local')) {
+    Route::get('/midtrans-auth-test', function () {
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production');
+        \Midtrans\Config::$isSanitized = true;
+
+        try {
+            // order id palsu, cuma buat ngetes AUTH
+            return \Midtrans\Transaction::status('ORDER-DOES-NOT-EXIST');
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    });
+}
+
+/*
+|--------------------------------------------------------------------------
 | AUTH USER
 |--------------------------------------------------------------------------
 */
@@ -45,7 +73,7 @@ Route::middleware('auth')->group(function () {
 
     // Ticket & Showtime
     Route::get('/movie/{movie}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
-    Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails']);
+    Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails'])->name('showtimes.details');
 
     // BOOKING
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
@@ -62,25 +90,36 @@ Route::middleware('auth')->group(function () {
     // E-Ticket (HANYA SETELAH PAID)
     Route::get('/booking/{booking}/ticket', [BookingController::class, 'ticket'])
         ->name('booking.ticket');
+
+    Route::get('/booking/{booking}/ticket/download', [BookingController::class, 'downloadTicket'])
+        ->name('booking.ticket.download');
 });
 
 /*
 |--------------------------------------------------------------------------
+
 | ADMIN
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('movies', AdminMovieController::class);
-    Route::resource('branches', AdminBranchController::class);
-    Route::resource('studios', AdminStudioController::class);
-    Route::resource('showtimes', AdminShowtimeController::class);
-    Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
-        ->name('reports.ticket_sales');
-});
+Route::prefix('admin')
+    ->middleware('auth')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::resource('movies', AdminMovieController::class);
+        Route::resource('branches', AdminBranchController::class);
+        Route::resource('studios', AdminStudioController::class);
+        Route::resource('showtimes', AdminShowtimeController::class);
+
+        Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
+            ->name('reports.ticket_sales');
+    });
 
 /*
 |--------------------------------------------------------------------------
+
 | BRANCH SESSION
 |--------------------------------------------------------------------------
 */
@@ -91,14 +130,16 @@ Route::post('/change-branch', function (Request $request) {
 
 Route::post('/set-branch', function (Request $request) {
     $branch = Branch::findOrFail($request->branch_id);
+
     session([
-        'branch_id' => $branch->id,
+        'branch_id'   => $branch->id,
         'branch_name' => $branch->name,
         'branch_city' => $branch->city,
-        'branch_lat' => (string) ($branch->latitude ?? ''),
-        'branch_lng' => (string) ($branch->longitude ?? ''),
+        'branch_lat'  => (string) ($branch->latitude ?? ''),
+        'branch_lng'  => (string) ($branch->longitude ?? ''),
     ]);
+
     return response()->json(['ok' => true]);
 })->name('set.branch');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
