@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. BRANCHES (Latitude & Longitude untuk Peta)
+        // 2. BRANCHES
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -48,9 +48,7 @@ return new class extends Migration
         // 4. STUDIOS
         Schema::create('studios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')
-                ->constrained('branches')
-                ->cascadeOnDelete();
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->enum('type', ['regular', 'vip', 'imax'])->default('regular');
             $table->decimal('base_price', 15, 2)->default(0);
@@ -61,9 +59,7 @@ return new class extends Migration
         // 5. SEATS
         Schema::create('seats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('studio_id')
-                ->constrained('studios')
-                ->cascadeOnDelete();
+            $table->foreignId('studio_id')->constrained()->cascadeOnDelete();
             $table->string('row_label');
             $table->integer('seat_number');
             $table->boolean('is_usable')->default(true);
@@ -73,12 +69,8 @@ return new class extends Migration
         // 6. SHOWTIMES
         Schema::create('showtimes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('movie_id')
-                ->constrained('movies')
-                ->cascadeOnDelete();
-            $table->foreignId('studio_id')
-                ->constrained('studios')
-                ->cascadeOnDelete();
+            $table->foreignId('movie_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('studio_id')->constrained()->cascadeOnDelete();
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
             $table->decimal('price', 15, 2);
@@ -88,28 +80,19 @@ return new class extends Migration
         // 7. BOOKINGS
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-            $table->foreignId('showtime_id')
-                ->constrained('showtimes')
-                ->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('showtime_id')->constrained()->cascadeOnDelete();
             $table->string('booking_code')->unique();
             $table->decimal('total_price', 15, 2);
-            $table->enum('payment_status', ['pending', 'paid', 'cancelled', 'expired'])
-                ->default('pending');
+            $table->enum('payment_status', ['pending', 'paid', 'cancelled', 'expired'])->default('pending');
             $table->timestamps();
         });
 
         // 8. TICKETS
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('booking_id')
-                ->constrained('bookings')
-                ->cascadeOnDelete();
-            $table->foreignId('seat_id')
-                ->constrained('seats')
-                ->cascadeOnDelete();
+            $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('seat_id')->constrained()->cascadeOnDelete();
             $table->decimal('price', 15, 2);
             $table->timestamps();
         });

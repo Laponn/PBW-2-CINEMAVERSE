@@ -20,7 +20,7 @@
 
             {{-- 1. DASHBOARD --}}
             <a href="{{ route('admin.dashboard') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
        {{ request()->routeIs('admin.dashboard') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -35,9 +35,9 @@
                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Master Data</p>
             </div>
 
-            {{-- 2. DATA FILM (YANG SUDAH ADA) --}}
+            {{-- 2. DATA FILM --}}
             <a href="{{ route('admin.movies.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
        {{ request()->routeIs('admin.movies.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -47,13 +47,23 @@
                 <span class="font-medium">Data Film</span>
             </a>
 
-            {{-- ================================================= --}}
-            {{-- 3. DATA CABANG (BARU) --}}
-            {{-- ================================================= --}}
+            {{-- ✅ 2B. COMING SOON MOVIE (BARU) --}}
+            <a href="{{ route('admin.comingsoon-movie.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
+       {{ request()->routeIs('admin.comingsoon-movie.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
+                {{-- Icon clapperboard --}}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 4h10a2 2 0 012 2v2H5V6a2 2 0 012-2zM5 8h14v12a2 2 0 01-2 2H7a2 2 0 01-2-2V8zM8 8l2-4m4 4l2-4m-10 4l2-4" />
+                </svg>
+                <span class="font-medium">Data Film Coming Soon</span>
+            </a>
+
+            {{-- 3. DATA CABANG --}}
             <a href="{{ route('admin.branches.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
        {{ request()->routeIs('admin.branches.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
-                {{-- Icon Map/Lokasi --}}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -62,13 +72,10 @@
                 <span class="font-medium">Data Cabang</span>
             </a>
 
-            {{-- ================================================= --}}
-            {{-- 4. DATA STUDIO (BARU) --}}
-            {{-- ================================================= --}}
+            {{-- 4. DATA STUDIO --}}
             <a href="{{ route('admin.studios.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
        {{ request()->routeIs('admin.studios.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
-                {{-- Icon Layar/Projector --}}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -76,32 +83,30 @@
                 </svg>
                 <span class="font-medium">Data Studio</span>
             </a>
-            <a href="{{ route('admin.reports.ticket_sales') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
+
+            {{-- Laporan --}}
+            <a href="{{ route('admin.reports.ticket_sales') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
    {{ request()->routeIs('admin.reports.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
 
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-     viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M3 3v18h18M7 15l4-4 4 3 5-6" />
-</svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 3v18h18M7 15l4-4 4 3 5-6" />
+                </svg>
 
                 <span class="font-medium">Laporan Penjualan Tiket</span>
             </a>
-
-
 
             {{-- LABEL TRANSAKSI --}}
             <div class="pt-4 pb-2">
                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Jadwal & Tiket</p>
             </div>
 
-            {{-- ================================================= --}}
-            {{-- 5. JADWAL TAYANG (BARU - Persiapan untuk langkah berikutnya) --}}
-            {{-- ================================================= --}}
+            {{-- 5. JADWAL TAYANG --}}
             <a href="{{ route('admin.showtimes.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
        {{ request()->routeIs('admin.showtimes.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
-                {{-- Icon Jam/Calendar --}}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -116,21 +121,19 @@
         <div class="p-6 border-t border-gray-800 space-y-2">
             <a href="{{ route('home') }}"
                 class="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white transition">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                 viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.75z" />
+                        d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.75z" />
                 </svg>
                 Kembali ke Home
             </a>
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                
-                <button type="submit" class="w-full text-left px-4 py-2 text-gray-400 hover:text-white transition" > 
-                    Logout 
+                <button type="submit" class="w-full text-left px-4 py-2 text-gray-400 hover:text-white transition">
+                    Logout
                 </button>
-                
             </form>
         </div>
     </aside>

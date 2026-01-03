@@ -19,48 +19,25 @@ use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 use App\Http\Controllers\Admin\BranchController as AdminBranchController;
 use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\SalesReportController;
+use App\Http\Controllers\Admin\ComingSoonMovieController;
 
 /*
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 | PUBLIC
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 */
 Route::get('/', [MovieController::class, 'index'])->name('home');
 Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movies.show');
 Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 
-/*
-|--------------------------------------------------------------------------
-
-| MIDTRANS AUTH TEST (DEBUG) - LOCAL ONLY
-|--------------------------------------------------------------------------
-| Hasil yang diharapkan:
-| - 404 / transaction doesn't exist  => key VALID (auth sukses)
-| - 401 Unknown Merchant             => key SALAH / bukan sandbox merchant tsb
-|
-| Hapus route ini setelah beres.
-*/
-if (app()->environment('local')) {
-    Route::get('/midtrans-auth-test', function () {
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-
-        try {
-            // order id palsu, cuma buat ngetes AUTH
-            return \Midtrans\Transaction::status('ORDER-DOES-NOT-EXIST');
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    });
-}
+// PUBLIC: Coming Soon (tidak perlu login)
+Route::get('/movies/coming-soon', [MovieController::class, 'comingSoon'])
+    ->name('movies.comingSoon');
 
 /*
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 | AUTH USER
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 */
 Route::middleware('auth')->group(function () {
 
@@ -75,19 +52,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/movie/{movie}/ticket', [ShowtimeController::class, 'ticket'])->name('movies.ticket');
     Route::get('/api/showtimes/{id}/details', [ShowtimeController::class, 'getDetails'])->name('showtimes.details');
 
-    // BOOKING
+    // Booking
     Route::post('/booking/process', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
     Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
 
-    // PAYMENT (MIDTRANS QRIS)
+    // Payment
     Route::get('/booking/{booking}/payment', [PaymentController::class, 'show'])
         ->name('booking.payment.page');
 
     Route::post('/booking/{booking}/payment', [PaymentController::class, 'pay'])
         ->name('booking.payment');
 
-    // E-Ticket (HANYA SETELAH PAID)
+    // E-Ticket
     Route::get('/booking/{booking}/ticket', [BookingController::class, 'ticket'])
         ->name('booking.ticket');
 
@@ -96,56 +73,48 @@ Route::middleware('auth')->group(function () {
 });
 
 /*
-|--------------------------------------------------------------------------
-
+|-------------------------------------------------------------------------- 
 | ADMIN
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 */
 Route::prefix('admin')
-    ->middleware('auth')
+    ->middleware('auth') // kalau ada middleware admin: ['auth','is_admin']
     ->name('admin.')
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Admin CRUD utama
         Route::resource('movies', AdminMovieController::class);
         Route::resource('branches', AdminBranchController::class);
         Route::resource('studios', AdminStudioController::class);
         Route::resource('showtimes', AdminShowtimeController::class);
 
+        // Coming Soon Movie (admin)
+        Route::resource('comingsoon-movie', ComingSoonMovieController::class);
+
+        // Reports
         Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
             ->name('reports.ticket_sales');
 
-     Route::get('branches-export', [AdminBranchController::class, 'export'])
-    ->name('branches.export');
+        Route::get('/reports/ticket-sales.export', [SalesReportController::class, 'export'])
+            ->name('reports.ticket_sales.export');
 
-    Route::post('branches-import', [AdminBranchController::class, 'import'])
-    ->name('branches.import');
+        // Export Import
+        Route::get('branches-export', [AdminBranchController::class, 'export'])->name('branches.export');
+        Route::post('branches-import', [AdminBranchController::class, 'import'])->name('branches.import');
 
-    Route::get('/reports/ticket-sales.export',[SalesReportController::class, 'export'])
-    ->name('reports.ticket_sales.export');
+        Route::get('movies-export', [AdminMovieController::class, 'export'])->name('movies.export');
+        Route::post('movies-import', [AdminMovieController::class, 'import'])->name('movies.import');
 
-    Route::get('movies-export', [AdminMovieController::class, 'export'])
-    ->name('movies.export');
-
-    Route::post('movies-import', [AdminMovieController::class, 'import'])
-    ->name('movies.import');
-
-    Route::get('studios-export', [AdminStudioController::class, 'export'])
-    ->name('studios.export');
-
-    Route::post('studios-import', [AdminStudioController::class, 'import'])
-    ->name('studios.import');
-
-
-
+        Route::get('studios-export', [AdminStudioController::class, 'export'])->name('studios.export');
+        Route::post('studios-import', [AdminStudioController::class, 'import'])->name('studios.import');
     });
 
 /*
-|--------------------------------------------------------------------------
-
+|-------------------------------------------------------------------------- 
 | BRANCH SESSION
-|--------------------------------------------------------------------------
+|-------------------------------------------------------------------------- 
 */
 Route::post('/change-branch', function (Request $request) {
     session(['selected_branch_id' => $request->branch_id]);

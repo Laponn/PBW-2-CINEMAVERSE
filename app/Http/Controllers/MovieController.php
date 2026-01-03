@@ -1,113 +1,53 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\MoviesExport;
-use App\Imports\MoviesImport;
 
 class MovieController extends Controller
 {
+    // list film sedang tayang
     public function index()
     {
-        $movies = Movie::latest()->get();
-        return view('admin.movies.index', compact('movies'));
+        $movies = Movie::where('status', 'now_showing')
+            ->latest()
+            ->get();
+
+        return view('movies.index', compact('movies'));
     }
 
-    public function create()
+    // detail film (punya kamu: movies/show.blade.php)
+    public function show($id)
     {
-        return view('admin.movies.create');
+        $movie = Movie::with(['showtimes.studio.branch'])
+            ->findOrFail($id);
+
+        return view('movies.show', compact('movie'));
     }
 
-    public function store(Request $request)
+    public function search(Request $request)
     {
-        $validated = $request->validate([
-            'title'            => 'required|string|max:255',
-            'description'      => 'required',
-            'duration_minutes' => 'required|integer',
-            'genre'            => 'nullable|string',
-            'poster'           => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'status'           => 'required|in:now_showing,coming_soon,ended',
-            'trailer_url'      => 'nullable|string',
-        ]);
+        $q = $request->query('q');
 
-        if ($request->hasFile('poster')) {
-            $path = $request->file('poster')->store('posters', 'public');
-            $validated['poster_url'] = '/storage/' . $path;
-        }
+        $movies = Movie::where('status', 'now_showing')
+            ->when($q, fn($query) => $query->where('title', 'like', "%{$q}%"))
+            ->latest()
+            ->get();
 
-        // Simpan data (release_date otomatis diatur ke hari ini)
-        $validated['release_date'] = now();
-        Movie::create($validated);
-
-        return redirect()->route('admin.movies.index')->with('success', 'Film baru berhasil ditambahkan!');
+        return view('movies.index', compact('movies', 'q'));
     }
 
-    public function edit(Movie $movie)
+    // public coming soon
+    public function comingSoon()
     {
-        return view('admin.movies.edit', compact('movie'));
+        $movies = Movie::where('status', 'coming_soon')
+            ->orderBy('release_date', 'asc')
+            ->get();
+
+        // Pastikan nama file view sesuai
+        return view('movies.coming-soon', compact('movies'));
+        // kalau file kamu masih cominSoon.blade.php:
+        // return view('movies.cominSoon', compact('movies'));
     }
-
-    public function update(Request $request, Movie $movie)
-    {
-        $validated = $request->validate([
-            'title'            => 'required|string|max:255',
-            'description'      => 'required',
-            'duration_minutes' => 'required|integer',
-            'genre'            => 'nullable|string',
-            'poster'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'status'           => 'required|in:now_showing,coming_soon,ended',
-            'trailer_url'      => 'nullable|string',
-        ]);
-
-        if ($request->hasFile('poster')) {
-            // Hapus file lama jika ada di storage lokal
-            if ($movie->poster_url && !str_starts_with($movie->poster_url, 'http')) {
-                $oldPath = str_replace('/storage/', '', $movie->poster_url);
-                Storage::disk('public')->delete($oldPath);
-            }
-
-            // Simpan poster baru
-            $path = $request->file('poster')->store('posters', 'public');
-            $validated['poster_url'] = '/storage/' . $path;
-        }
-
-        // Update semua data yang sudah divalidasi
-        $movie->update($validated);
-
-        return redirect()->route('admin.movies.index')->with('success', 'Data film "' . $movie->title . '" berhasil diperbarui!');
-    }
-
-    public function destroy(Movie $movie)
-    {
-        if ($movie->poster_url && !str_starts_with($movie->poster_url, 'http')) {
-            $path = str_replace('/storage/', '', $movie->poster_url);
-            Storage::disk('public')->delete($path);
-        }
-
-        $movie->delete();
-        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil dihapus dari katalog.');
-    }
-    public function export()
-{
-    return Excel::download(new MoviesExport, 'movies.xlsx');
-}
-
-public function import(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls'
-    ]);
-
-    Excel::import(new MoviesImport, $request->file('file'));
-
-    return redirect()
-        ->route('admin.movies.index')
-        ->with('success', 'Data film berhasil diimport.');
-}
 }
