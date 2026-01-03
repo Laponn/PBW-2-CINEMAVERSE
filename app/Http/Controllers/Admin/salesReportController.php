@@ -9,6 +9,8 @@ use App\Models\Branch;
 use App\Models\Studio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\TicketSalesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SalesReportController extends Controller
 {
@@ -62,4 +64,13 @@ class SalesReportController extends Controller
             'moviesList', 'branchesList', 'studiosList'
         ));
     }
+
+public function export(Request $request)
+{
+    return Excel::download(
+        new TicketSalesExport($request->all()),
+        'ticket-sales-report.xlsx'
+    );
+}
+
 }

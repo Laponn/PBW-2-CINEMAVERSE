@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Exports\BranchesExport;
+use App\Imports\BranchesImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class BranchController extends Controller
 {
@@ -27,7 +32,7 @@ class BranchController extends Controller
             'city'    => 'required|string|max:255',
             'address' => 'required|string', 
             'latitude'  => 'nullable|numeric', // Validasi angka
-        'longitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         Branch::create($request->all());
@@ -61,4 +66,24 @@ class BranchController extends Controller
         $branch->delete();
         return redirect()->route('admin.branches.index')->with('success', 'Cabang dihapus');
     }
+
+
+public function export()
+{
+    return Excel::download(new BranchesExport, 'branches.xlsx');
+}
+
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls'
+    ]);
+
+    Excel::import(new BranchesImport, $request->file('file'));
+
+    return redirect()
+        ->route('admin.branches.index')
+        ->with('success', 'Data cabang berhasil diimport');
+}
+
 }

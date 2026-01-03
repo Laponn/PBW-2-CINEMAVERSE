@@ -115,6 +115,16 @@ Route::prefix('admin')
 
         Route::get('/reports/ticket-sales', [SalesReportController::class, 'index'])
             ->name('reports.ticket_sales');
+
+     Route::get('branches-export', [AdminBranchController::class, 'export'])
+    ->name('branches.export');
+
+Route::post('branches-import', [AdminBranchController::class, 'import'])
+    ->name('branches.import');
+
+    Route::get('/reports/ticket-sales.export',[SalesReportController::class, 'export'])
+    ->name('reports.ticket_sales.export');
+
     });
 
 /*

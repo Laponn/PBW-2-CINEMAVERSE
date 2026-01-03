@@ -4,6 +4,7 @@
 <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
     <h2 class="text-2xl font-bold mb-6 text-gray-800">Tambah Cabang Baru</h2>
 
+    
     <form action="{{ route('admin.branches.store') }}" method="POST">
         @csrf
 
