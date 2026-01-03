@@ -6,22 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MoviesExport;
+use App\Imports\MoviesImport;
 
 class MovieController extends Controller
 {
-    // Menggunakan middleware di constructor lebih rapi daripada memanggil ensureAdmin di tiap fungsi
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!Auth::check() || Auth::user()->role !== 'admin') {
-                abort(403, 'Unauthorized - Anda bukan admin CinemaVerse');
-            }
-            return $next($request);
-        });
-    }
-
     public function index()
     {
         $movies = Movie::latest()->get();
@@ -102,4 +92,21 @@ class MovieController extends Controller
         $movie->delete();
         return redirect()->route('admin.movies.index')->with('success', 'Film berhasil dihapus dari katalog.');
     }
+    public function export()
+{
+    return Excel::download(new MoviesExport, 'movies.xlsx');
+}
+
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls'
+    ]);
+
+    Excel::import(new MoviesImport, $request->file('file'));
+
+    return redirect()
+        ->route('admin.movies.index')
+        ->with('success', 'Data film berhasil diimport.');
+}
 }
