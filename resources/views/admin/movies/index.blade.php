@@ -15,6 +15,45 @@
            class="inline-flex items-center justify-center px-8 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-full transition transform hover:scale-105 shadow-xl shadow-red-600/20 uppercase tracking-widest">
             + Tambah Film Baru
         </a>
+        <div class="flex gap-3">
+    <a href="{{ route('admin.movies.export') }}"
+       class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700
+              text-white text-xs font-black rounded-full uppercase tracking-widest transition">
+        Export Excel
+    </a>
+
+    <button onclick="document.getElementById('importModal').classList.remove('hidden')"
+        class="inline-flex items-center px-6 py-3 bg-zinc-800 hover:bg-zinc-900
+               text-white text-xs font-black rounded-full uppercase tracking-widest transition">
+        Import Excel
+    </button>
+</div>
+    <div id="importModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-black uppercase mb-4">Import Film</h3>
+
+        <form action="{{ route('admin.movies.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <input type="file" name="file" required
+                   class="w-full border border-zinc-200 rounded-xl p-2 mb-4">
+
+            <div class="flex justify-end gap-2">
+                <button type="button"
+                        onclick="document.getElementById('importModal').classList.add('hidden')"
+                        class="px-4 py-2 text-sm bg-zinc-100 rounded-xl">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-xl font-black uppercase">
+                    Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
     </div>
 
     {{-- Table Section --}}

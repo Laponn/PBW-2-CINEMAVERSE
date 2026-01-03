@@ -6,6 +6,32 @@
     <a href="{{ route('admin.studios.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         + Tambah Studio
     </a>
+    <div class="flex justify-between items-center mb-6 gap-2">
+    <h2 class="text-2xl font-bold text-gray-800">Daftar Studio</h2>
+
+    <div class="flex gap-2">
+        <a href="{{ route('admin.studios.export') }}"
+           class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-bold">
+            Export Excel
+        </a>
+
+        <form action="{{ route('admin.studios.import') }}" method="POST" enctype="multipart/form-data" class="inline-flex gap-2">
+            @csrf
+            <input type="file" name="file" required
+                   class="text-sm border rounded px-2 py-1">
+            <button type="submit"
+                    class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 text-sm font-bold">
+                Import
+            </button>
+        </form>
+
+        <a href="{{ route('admin.studios.create') }}"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-bold">
+            + Tambah Studio
+        </a>
+    </div>
+</div>
+
 </div>
 
 @if(session('success'))

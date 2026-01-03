@@ -119,11 +119,25 @@ Route::prefix('admin')
      Route::get('branches-export', [AdminBranchController::class, 'export'])
     ->name('branches.export');
 
-Route::post('branches-import', [AdminBranchController::class, 'import'])
+    Route::post('branches-import', [AdminBranchController::class, 'import'])
     ->name('branches.import');
 
     Route::get('/reports/ticket-sales.export',[SalesReportController::class, 'export'])
     ->name('reports.ticket_sales.export');
+
+    Route::get('movies-export', [AdminMovieController::class, 'export'])
+    ->name('movies.export');
+
+    Route::post('movies-import', [AdminMovieController::class, 'import'])
+    ->name('movies.import');
+
+    Route::get('studios-export', [AdminStudioController::class, 'export'])
+    ->name('studios.export');
+
+    Route::post('studios-import', [AdminStudioController::class, 'import'])
+    ->name('studios.import');
+
+
 
     });
 

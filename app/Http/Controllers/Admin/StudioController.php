@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Studio;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use App\Exports\StudiosExport;
+use App\Imports\StudiosImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class StudioController extends Controller
 {
@@ -66,4 +70,22 @@ class StudioController extends Controller
         $studio->delete();
         return redirect()->route('admin.studios.index')->with('success', 'Studio dihapus');
     }
+
+    public function export()
+{
+    return Excel::download(new StudiosExport, 'studios.xlsx');
+}
+
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls'
+    ]);
+
+    Excel::import(new StudiosImport, $request->file('file'));
+
+    return redirect()->route('admin.studios.index')
+        ->with('success', 'Data studio berhasil diimpor');
+}
+
 }
