@@ -79,11 +79,11 @@
             <a href="{{ route('admin.reports.ticket_sales') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200
    {{ request()->routeIs('admin.reports.*') ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'text-gray-400 hover:bg-zinc-800 hover:text-white' }}">
 
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+     viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 3v18h18M7 15l4-4 4 3 5-6" />
+</svg>
 
                 <span class="font-medium">Laporan Penjualan Tiket</span>
             </a>
@@ -113,22 +113,24 @@
         </nav>
 
         <!-- Bottom actions -->
-        <div class="p-4 border-t border-gray-800 space-y-2">
+        <div class="p-6 border-t border-gray-800 space-y-2">
             <a href="{{ route('home') }}"
                 class="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.75z" />
                 </svg>
                 Kembali ke Home
             </a>
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full text-left px-4 py-2 text-gray-400 hover:text-white transition">
-                    Logout
+                
+                <button type="submit" class="w-full text-left px-4 py-2 text-gray-400 hover:text-white transition" > 
+                    Logout 
                 </button>
+                
             </form>
         </div>
     </aside>
