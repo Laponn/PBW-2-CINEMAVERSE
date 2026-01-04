@@ -1,277 +1,169 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Library Alpine.js untuk Tab Jadwal --}}
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<main class="pt-24 pb-16 min-h-screen bg-[#050509] text-white">
+    <div class="max-w-screen-2xl mx-auto px-6 space-y-20">
+
+        {{-- TOMBOL KEMBALI --}}
+        <a href="{{ route('home') }}" class="inline-flex items-center gap-4 text-[11px] font-black text-zinc-500 hover:text-red-500 transition-all group uppercase tracking-[0.3em]">
+            <span class="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:bg-red-600 group-hover:border-red-600 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Katalog Film
+        </a>
+
+        {{-- SECTION 1: HERO DETAIL (POSTER & SINOPSIS) --}}
+        <section class="perspective-wrap">
+            <div class="relative overflow-hidden rounded-[4rem] border border-white/5 bg-zinc-900/10 backdrop-blur-xl shadow-2xl">
+                <div class="relative p-10 md:p-16 grid lg:grid-cols-[380px,1fr] gap-16 items-center">
+                    
+                    {{-- 3D TILT POSTER --}}
+                    <div class="movie-tilt-card relative group mx-auto lg:mx-0 w-full max-w-[320px] aspect-[2/3] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 block">
+                        <div class="glow"></div>
+                        <img src="{{ $movie->poster_url }}" 
+                             alt="{{ $movie->title }}" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 poster-wrap">
+                    </div>
+                    
+                    {{-- INFO FILM --}}
+                    <div class="space-y-8">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <span class="px-4 py-1.5 rounded-full bg-red-600/10 border border-red-600/20 text-[10px] font-black text-red-500 uppercase tracking-widest italic">Movie Profile</span>
+                                <span class="text-zinc-500 text-[11px] font-black uppercase tracking-[0.3em]">{{ \Carbon\Carbon::parse($movie->release_date)->format('Y') }}</span>
+                            </div>
+                            
+                            {{-- Judul (Ukuran Proporsional) --}}
+                            <h1 class="text-4xl md:text-6xl font-black leading-[1] tracking-tighter italic uppercase text-white">
+                                {{ $movie->title }}
+                            </h1>
+
+                            <div class="flex flex-wrap gap-3 pt-2">
+                                <div class="px-5 py-2 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black text-zinc-300 uppercase italic">{{ $movie->duration_minutes }} MINS</div>
+                                <div class="px-5 py-2 rounded-2xl bg-red-600 text-[10px] font-black text-white uppercase italic">{{ $movie->genre }}</div>
+                            </div>
+                        </div>
+
+                        <p class="text-zinc-400 leading-relaxed max-w-3xl text-xl italic font-medium border-l-4 border-red-600 pl-6">
+                            "{{ $movie->description }}"
+                        </p>
+
+                        <div class="flex flex-wrap items-center gap-6 pt-4">
+                            <a href="#jadwal" class="px-12 py-5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-red-600/20 transition-all transform hover:scale-105 italic">
+                                Beli Tiket
+                            </a>
+                            @if($movie->trailer_url)
+                            <a href="{{ $movie->trailer_url }}" target="_blank" class="px-12 py-5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic">
+                                Trailer
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- SECTION 2: JADWAL TAYANG --}}
+        @php
+            $groupedShowtimes = $movie->showtimes->groupBy(function($st) {
+                return \Carbon\Carbon::parse($st->start_time)->format('Y-m-d');
+            })->sortKeys();
+        @endphp
+
+        <section id="jadwal" class="space-y-10 scroll-mt-32" x-data="{ activeDate: '{{ $groupedShowtimes->keys()->first() }}' }">
+            <div class="flex items-end justify-between border-b border-white/5 pb-8">
+                <h2 class="text-3xl font-black uppercase italic tracking-tighter text-white">Jadwal <span class="text-red-600">Tayang</span></h2>
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Cabang: {{ session('branch_name', 'Semua Lokasi') }}</span>
+            </div>
+            
+            {{-- Tabs Tanggal --}}
+            <div class="flex gap-4 overflow-x-auto pb-4 nice-scroll">
+                @foreach($groupedShowtimes as $date => $shows)
+                    <button @click="activeDate = '{{ $date }}'"
+                        :class="activeDate === '{{ $date }}' ? 'border-red-600 bg-red-600 text-white shadow-lg shadow-red-600/20' : 'border-white/10 bg-white/5 text-zinc-500'"
+                        class="flex-shrink-0 px-8 py-5 rounded-3xl border transition-all text-center min-w-[140px]">
+                        <span class="block text-[10px] font-black uppercase tracking-widest mb-1 opacity-60">{{ \Carbon\Carbon::parse($date)->translatedFormat('D') }}</span>
+                        <span class="block text-xl font-black italic uppercase">{{ \Carbon\Carbon::parse($date)->translatedFormat('d M') }}</span>
+                    </button>
+                @endforeach
+            </div>
+
+            {{-- Grid Jam Tayang (Studio) --}}
+            <div class="perspective-wrap">
+                @forelse($groupedShowtimes as $date => $shows)
+                    <div x-show="activeDate === '{{ $date }}'" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-4"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        
+                        @foreach($shows->groupBy('studio.name') as $studioName => $times)
+                            <div class="movie-tilt-card bg-zinc-900/40 border border-white/5 p-8 rounded-[3rem] backdrop-blur-md relative overflow-hidden flex flex-col justify-between group h-full">
+                                <div class="glow"></div>
+                                <div class="info-wrap">
+                                    <h3 class="font-black text-red-600 uppercase tracking-widest text-sm italic">{{ $studioName }}</h3>
+                                    <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
+                                        {{ $times->first()->studio->type }} CLASS • {{ $times->first()->studio->capacity }} SEATS
+                                    </p>
+                                </div>
+                                
+                                {{-- Link ke halaman movies.ticket --}}
+                                <div class="grid grid-cols-2 gap-3 mt-8 poster-wrap">
+                                    @foreach($times as $st)
+                                        <a href="{{ route('movies.ticket', $movie->id) }}?showtime_id={{ $st->id }}" 
+                                           class="p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white hover:text-black transition-all text-center group/time shadow-lg">
+                                            <div class="text-lg font-black italic tracking-tighter">{{ \Carbon\Carbon::parse($st->start_time)->format('H:i') }}</div>
+                                            <div class="text-[8px] font-black text-zinc-500 group-hover/time:text-zinc-600 uppercase mt-1 italic leading-none">
+                                                Rp {{ number_format($st->price, 0, ',', '.') }}
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @empty
+                    <div class="py-24 text-center border-2 border-dashed border-zinc-800 rounded-[3rem]">
+                        <p class="text-zinc-600 font-black uppercase tracking-widest italic text-sm">Jadwal tayang tidak tersedia.</p>
+                    </div>
+                @endforelse
+            </div>
+        </section>
+    </div>
+</main>
+
 <style>
-    /* Global Scrollbar */
-    .nice-scroll::-webkit-scrollbar { height: 3px; width: 4px; }
-    .nice-scroll::-webkit-scrollbar-thumb { background: rgba(220, 38, 38, 0.4); border-radius: 10px; }
-
-    /* Perspective System */
-    .perspective-wrap { perspective: 1500px; }
-    .premium-card { 
-        background: rgba(24, 24, 27, 0.4);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    .perspective-wrap { perspective: 2000px; }
+    .movie-tilt-card { transform-style: preserve-3d; transition: transform 0.2s ease-out; }
+    .movie-tilt-card .glow {
+        position: absolute; inset: -20%; pointer-events: none; z-index: 5;
+        background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(220, 38, 38, 0.15) 0%, transparent 60%);
     }
-
-    /* Step Buttons Scaling (Zoom Out) */
-    .btn-step {
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    /* Date Button Active */
-    .date-selected {
-        background: #dc2626 !important;
-        border-color: #ef4444 !important;
-        transform: translateY(-4px) scale(1.03);
-        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
-    }
-
-    /* Time Button Active */
-    .time-selected {
-        background: white !important;
-        color: black !important;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(255, 255, 255, 0.1);
-    }
-    .time-selected span { color: black !important; }
-
-    /* Seat Scaling (Smaller) */
-    .seat-base {
-        transition: all 0.2s ease;
-    }
-    .seat-available:hover {
-        transform: scale(1.15);
-        background: rgba(220, 38, 38, 0.15);
-    }
-    .seat-selected {
-        background: #dc2626 !important;
-        border-color: #ff4d4d !important;
-        box-shadow: 0 0 12px rgba(220, 38, 38, 0.6);
-        transform: scale(1.15);
-    }
-    .seat-occupied { background: #18181b !important; opacity: 0.25; cursor: not-allowed; }
-
-    /* Screen Decoration */
-    .screen-area {
-        height: 6px; width: 100%; background: white; border-radius: 50%;
-        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
-    }
+    .poster-wrap { transform: translateZ(30px); }
+    .info-wrap { transform: translateZ(50px); }
+    
+    html { scroll-behavior: smooth; }
+    .nice-scroll::-webkit-scrollbar { height: 4px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
 </style>
 
-<div class="bg-[#050509] min-h-screen text-white pt-24 pb-12">
-    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-8 space-y-8">
-            {{-- HEADER --}}
-            <div class="space-y-1">
-                <span class="px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20 text-[9px] font-black text-red-500 uppercase tracking-widest italic">Reservation</span>
-                <h1 class="text-3xl font-black italic uppercase tracking-tighter">Book <span class="text-red-600">Experience</span></h1>
-            </div>
-
-            {{-- STEP 1: PILIH TANGGAL --}}
-            <div class="premium-card p-6 rounded-[2.5rem]">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black italic text-xs shadow-lg shadow-red-600/30">01</div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Tanggal Menonton</h3>
-                </div>
-                
-                <div class="flex gap-3 overflow-x-auto pb-2 nice-scroll">
-                    @forelse($availableDates as $date)
-                        @php $cDate = \Illuminate\Support\Carbon::parse($date); @endphp
-                        <button type="button" 
-                            class="date-btn btn-step min-w-[85px] p-4 rounded-2xl border border-white/5 bg-white/5" 
-                            data-date="{{ $date }}"
-                            data-date-display="{{ $cDate->translatedFormat('D, d M') }}">
-                            <span class="block text-[9px] uppercase text-zinc-500 font-black mb-1 tracking-widest">{{ $cDate->translatedFormat('D') }}</span>
-                            <span class="block text-2xl font-black italic tracking-tighter">{{ $cDate->format('d') }}</span>
-                            <span class="block text-[9px] text-zinc-400 font-bold uppercase">{{ $cDate->translatedFormat('M') }}</span>
-                        </button>
-                    @empty
-                        <p class="text-zinc-600 italic font-black uppercase text-[10px]">Jadwal tidak tersedia.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- STEP 2: PILIH JAM --}}
-            <div id="time-section" class="premium-card p-6 rounded-[2.5rem] hidden">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black italic text-xs">02</div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Jam & Studio</h3>
-                </div>
-                
-                <div id="time-container" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach($showtimes as $st)
-                        <button type="button" class="time-btn btn-step p-4 rounded-2xl border border-white/5 bg-white/5 text-left hidden" 
-                            data-date-ref="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('Y-m-d') }}" 
-                            data-id="{{ $st->id }}"
-                            data-time="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('H:i') }}">
-                            <span class="block font-black text-xl italic tracking-tighter">{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('H:i') }}</span>
-                            <span class="block text-[8px] text-zinc-500 font-black uppercase mt-1">{{ $st->studio->name }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- STEP 3: PILIH KURSI (ZOOM OUT) --}}
-            <div id="seat-section" class="premium-card p-8 rounded-[3rem] hidden">
-                <div class="mb-12 px-6">
-                    <div class="screen-area"></div>
-                    <p class="text-center text-[7px] font-black uppercase tracking-[0.8em] text-zinc-700 mt-4">Screen Area</p>
-                </div>
-
-                <div id="seat-grid" class="space-y-3"></div>
-            </div>
-        </div>
-
-        {{-- SIDEBAR SUMMARY (ZOOM OUT) --}}
-        <div class="lg:col-span-4">
-            <div class="premium-card p-7 rounded-[3rem] sticky top-28 space-y-8">
-                <div>
-                    <span class="text-[8px] font-black text-red-600 uppercase tracking-[0.3em] mb-2 block">Booking Details</span>
-                    <h2 class="text-xl font-black italic tracking-tighter uppercase leading-none">{{ $movie->title }}</h2>
-                    <p class="text-[9px] font-bold text-zinc-500 uppercase mt-2 tracking-widest">{{ session('branch_name', 'Global') }}</p>
-                </div>
-                
-                <div class="space-y-4 text-[10px] font-black border-t border-white/5 pt-6 uppercase tracking-widest">
-                    <div class="flex justify-between"><span>Studio</span><span id="sum-studio" class="text-white">-</span></div>
-                    <div class="flex justify-between"><span>Time</span><span id="sum-time" class="text-white">-</span></div>
-                    <div class="flex justify-between"><span>Seats</span><span id="sum-seats" class="text-red-500 italic">-</span></div>
-                </div>
-
-                <div class="pt-6 border-t border-white/5">
-                    <div class="flex justify-between items-end mb-6">
-                        <span class="text-[9px] font-black uppercase text-zinc-600 tracking-widest">Total</span>
-                        <span id="sum-total" class="text-2xl font-black italic text-white tracking-tighter">Rp 0</span>
-                    </div>
-
-                    <form action="{{ route('booking.store') }}" method="POST" id="bookingForm">
-                        @csrf
-                        <input type="hidden" name="showtime_id" id="input-showtime">
-                        <div id="seat-inputs"></div>
-                        <button type="submit" id="checkoutBtn" disabled class="w-full bg-zinc-800 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] text-zinc-600 cursor-not-allowed transition-all shadow-lg active:scale-95">
-                            Pilih Kursi Dahulu
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-// Logic JavaScript tetap sama dengan penyesuaian ukuran grid di renderSeats
-let selectedPrice = 0;
-let selectedSeats = [];
-let activeDateLabel = "";
-
-function updateSummary() {
-    const btn = document.getElementById('checkoutBtn');
-    document.getElementById('sum-seats').textContent = selectedSeats.length ? selectedSeats.map(s => s.name).join(', ') : '-';
-    document.getElementById('sum-total').textContent = 'Rp ' + (selectedSeats.length * selectedPrice).toLocaleString('id-ID');
-    
-    const wrap = document.getElementById('seat-inputs');
-    wrap.innerHTML = '';
-    selectedSeats.forEach(s => {
-        const input = document.createElement('input');
-        input.type = 'hidden'; input.name = 'seat_ids[]'; input.value = s.id;
-        wrap.appendChild(input);
-    });
-
-    if(selectedSeats.length > 0) {
-        btn.disabled = false;
-        btn.textContent = 'Konfirmasi Tiket';
-        btn.className = "w-full bg-red-600 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] text-white hover:bg-red-700 shadow-lg cursor-pointer transition-all";
-    } else {
-        btn.disabled = true;
-        btn.textContent = 'Pilih Kursi Dahulu';
-        btn.className = "w-full bg-zinc-800 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] text-zinc-600 cursor-not-allowed shadow-lg";
-    }
-}
-
-function renderSeats(seats, occupied) {
-    const grid = document.getElementById('seat-grid');
-    grid.innerHTML = ''; selectedSeats = []; updateSummary();
-    const rows = {};
-    seats.forEach(s => {
-        if(!rows[s.row_label]) rows[s.row_label] = [];
-        rows[s.row_label].push(s);
-    });
-
-    Object.keys(rows).sort().forEach(label => {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = "flex items-center gap-4 justify-center mb-3";
-        const labelSpan = document.createElement('span');
-        labelSpan.className = "w-4 text-zinc-800 font-black text-[10px] italic";
-        labelSpan.textContent = label;
-        const seatsWrap = document.createElement('div');
-        seatsWrap.className = "flex gap-2";
-
-        rows[label].sort((a,b) => a.seat_number - b.seat_number).forEach(seat => {
-            const isTaken = occupied.includes(seat.id);
-            const btn = document.createElement('button');
-            btn.type = "button";
-            btn.className = `seat-base w-8 h-8 rounded-lg text-[9px] font-black border transition-all ${isTaken ? 'seat-occupied' : 'bg-white/5 border-white/10 text-zinc-500 seat-available'}`;
-            btn.textContent = seat.seat_number;
-            btn.disabled = isTaken;
-            
-            if(!isTaken) {
-                btn.onclick = () => {
-                    const idx = selectedSeats.findIndex(s => s.id === seat.id);
-                    if(idx > -1) {
-                        selectedSeats.splice(idx, 1);
-                        btn.classList.remove('seat-selected');
-                    } else {
-                        if(selectedSeats.length >= 8) return alert('Maksimal 8 kursi');
-                        selectedSeats.push({id: seat.id, name: label + seat.seat_number});
-                        btn.classList.add('seat-selected');
-                    }
-                    updateSummary();
-                };
-            }
-            seatsWrap.appendChild(btn);
+    // Logika Tilt 3D untuk Poster & Kartu Jadwal
+    document.querySelectorAll('.movie-tilt-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            card.style.transform = `rotateX(${-(y - 0.5) * 12}deg) rotateY(${(x - 0.5) * 12}deg) scale(1.02)`;
+            card.style.setProperty('--gx', `${x * 100}%`);
+            card.style.setProperty('--gy', `${y * 100}%`);
         });
-        rowDiv.append(labelSpan, seatsWrap);
-        grid.appendChild(rowDiv);
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+        });
     });
-}
-
-// Handler tombol (tetap sama)
-function handleDateClick(btn) {
-    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('date-selected'));
-    btn.classList.add('date-selected');
-    activeDateLabel = btn.dataset.dateDisplay;
-    document.getElementById('time-section').classList.remove('hidden');
-    document.querySelectorAll('.time-btn').forEach(t => {
-        t.classList.toggle('hidden', t.dataset.dateRef !== btn.dataset.date);
-        t.classList.remove('time-selected');
-    });
-    document.getElementById('seat-section').classList.add('hidden');
-    resetSummary();
-}
-
-async function handleTimeClick(btn) {
-    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('time-selected'));
-    btn.classList.add('time-selected');
-    const grid = document.getElementById('seat-grid');
-    document.getElementById('seat-section').classList.remove('hidden');
-    grid.innerHTML = '<div class="py-12 text-center text-[8px] font-black uppercase tracking-widest animate-pulse text-red-600">Hall Loading...</div>';
-    try {
-        const res = await fetch(`/api/showtimes/${btn.dataset.id}/details`);
-        const data = await res.json();
-        selectedPrice = data.price;
-        document.getElementById('input-showtime').value = btn.dataset.id;
-        document.getElementById('sum-studio').textContent = data.studio_name;
-        document.getElementById('sum-time').textContent = `${activeDateLabel} @ ${btn.dataset.time}`;
-        renderSeats(data.seats, data.occupied);
-    } catch (err) { grid.innerHTML = 'Error'; }
-}
-
-function initTicketPage() {
-    document.querySelectorAll('.date-btn').forEach(btn => btn.onclick = () => handleDateClick(btn));
-    document.querySelectorAll('.time-btn').forEach(btn => btn.onclick = () => handleTimeClick(btn));
-}
-document.addEventListener('DOMContentLoaded', initTicketPage);
-document.addEventListener('turbo:load', initTicketPage);
 </script>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class MovieController extends Controller
 {
@@ -19,12 +20,25 @@ class MovieController extends Controller
 
     // detail film (punya kamu: movies/show.blade.php)
     public function show($id)
-    {
-        $movie = Movie::with(['showtimes.studio.branch'])
-            ->findOrFail($id);
+{
+    $movie = Movie::with(['showtimes.studio.branch'])
+        ->findOrFail($id);
 
-        return view('movies.show', compact('movie'));
-    }
+    // Ambil semua showtime
+    $showtimes = $movie->showtimes;
+
+    // Ambil tanggal unik dari start_time
+    $availableDates = $showtimes
+        ->map(fn ($st) => Carbon::parse($st->start_time)->format('Y-m-d'))
+        ->unique()
+        ->values();
+
+    return view('movies.show', compact(
+        'movie',
+        'showtimes',
+        'availableDates'
+    ));
+}
 
     public function search(Request $request)
     {

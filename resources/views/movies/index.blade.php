@@ -160,9 +160,10 @@
     .movie-tilt-card { transform-style: preserve-3d; transition: transform 0.2s ease-out; }
     .movie-tilt-card .glow {
         position: absolute; inset: -20%; pointer-events: none; z-index: 5;
-        background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(220, 38, 38, 0.15) 0%, transparent 60%);
+        background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(220, 38, 38, 0.15) 0%, transparent 60%)
+        pointer-events: none;;
     }
-    .poster-wrap { transform: translateZ(30px); }
+    .poster-wrap { transform: translateZ(30px) ; }
     .info-wrap { transform: translateZ(60px); }
     .hero-slide iframe { min-width: 100%; min-height: 100%; aspect-ratio: 16/9; pointer-events: none; }
 </style>
