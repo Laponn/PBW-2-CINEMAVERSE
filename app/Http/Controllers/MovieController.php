@@ -17,13 +17,19 @@ class MovieController extends Controller
         return view('movies.index', compact('movies'));
     }
 
-    // detail film (punya kamu: movies/show.blade.php)
     public function show($id)
     {
-        $movie = Movie::with(['showtimes.studio.branch'])
-            ->findOrFail($id);
+        $movie = Movie::with(['showtimes.studio.branch'])->findOrFail($id);
 
-        return view('movies.show', compact('movie'));
+    $availableDates = $movie->showtimes()
+        ->selectRaw('DATE(start_time) as date')
+        ->distinct()
+        ->orderBy('date')
+        ->pluck('date');
+
+    $showtimes = $movie->showtimes; 
+
+    return view('movies.show', compact('movie', 'availableDates', 'showtimes'));
     }
 
     public function search(Request $request)
