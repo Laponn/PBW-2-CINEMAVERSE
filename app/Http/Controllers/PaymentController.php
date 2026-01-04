@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Midtrans\CoreApi;
+use Midtrans\Config;
+use Midtrans\Snap; // Gunakan Snap
 
 class PaymentController extends Controller
 {
@@ -17,46 +18,51 @@ class PaymentController extends Controller
             return redirect()->route('booking.ticket', $booking->id);
         }
 
-        return view('payment.index', compact('booking'));
-    }
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = false;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
 
-    public function pay(Request $request, Booking $booking)
-    {
-        if ($booking->user_id !== Auth::id()) abort(403);
-
-        \Midtrans\Config::$serverKey    = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = false;
-        \Midtrans\Config::$isSanitized  = true;
-
-        $orderId = 'CNV-' . $booking->id . '-' . time();
-
+        // Siapkan parameter transaksi
         $params = [
-            'payment_type' => 'qris',
             'transaction_details' => [
-                'order_id' => $orderId,
+                'order_id' => 'CNV-' . $booking->id . '-' . time(),
                 'gross_amount' => (int) $booking->total_price,
             ],
-            'item_details' => [[
-                'id' => 'booking-' . $booking->id,
-                'price' => (int) $booking->total_price,
-                'quantity' => 1,
-                'name' => 'Tiket CinemaVerse',
-            ]],
             'customer_details' => [
                 'first_name' => Auth::user()->name,
                 'email' => Auth::user()->email,
             ],
-            'qris' => [
-                'acquirer' => 'gopay',
-            ],
         ];
 
-        $response = CoreApi::charge($params);
+        // Buat Snap Token
+        $snapToken = Snap::getSnapToken($params);
 
-        return view('payment.qris', [
-            'booking'  => $booking,
-            'orderId'  => $orderId,
-            'qrString' => $response->qr_string,
-        ]);
+        return view('payment.index', compact('booking', 'snapToken'));
+    }
+    
+    // Fungsi callback tetap sama untuk memproses notifikasi otomatis
+    public function callback(Request $request)
+    {
+        Config::$serverKey = config('midtrans.server_key');
+        $notif = new \Midtrans\Notification();
+
+        $transaction = $notif->transaction_status;
+        $order_id = $notif->order_id;
+
+        $parts = explode('-', $order_id);
+        $bookingId = $parts[1];
+        $booking = Booking::find($bookingId);
+
+        if (!$booking) return response()->json(['message' => 'Not found'], 404);
+
+        if ($transaction == 'settlement' || $transaction == 'capture') {
+            $booking->update(['payment_status' => 'paid']);
+        } elseif (in_array($transaction, ['deny', 'expire', 'cancel'])) {
+            $booking->update(['payment_status' => 'cancelled']);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 }

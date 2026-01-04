@@ -71,32 +71,39 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             @forelse($movies as $movie)
-                <div class="group cursor-pointer" onclick="window.location='{{ route('movies.show', $movie->id) }}'">
-                    <div class="relative aspect-[2/3] rounded-3xl overflow-hidden border border-zinc-800 transition-all duration-500 group-hover:border-red-600/50 group-hover:shadow-[0_0_40px_rgba(220,38,38,0.15)]">
-                      <img src="{{ str_starts_with($movie->poster_url, 'http') ? $movie->poster_url : asset($movie->poster_url) }}" 
-     alt="{{ $movie->title }}" 
-     onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster+Available'"
-     class="w-full h-full object-cover">
-     
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                        
-                        <div class="absolute top-4 right-4">
-                            <span class="bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
-                                {{ $movie->duration_minutes }} Min
-                            </span>
-                        </div>
-                    </div>
-                    <div class="mt-6 space-y-2">
-                        <h3 class="font-black text-white text-lg tracking-tight leading-tight group-hover:text-red-500 transition-colors uppercase italic">
-                            {{ $movie->title }}
-                        </h3>
-                        <p class="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-black">{{ $movie->genre }}</p>
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-full py-24 text-center border-2 border-dashed border-zinc-800 rounded-[3rem]">
-                    <p class="text-zinc-500 font-bold uppercase tracking-widest italic">Belum ada film yang tayang di lokasi ini.</p>
-                </div>
+               <div class="group cursor-pointer" onclick="window.location='{{ route('movies.show', $movie->id) }}'">
+    {{-- Poster Container --}}
+    <div class="relative aspect-[2/3] rounded-3xl overflow-hidden border border-zinc-800 transition-all duration-500 group-hover:border-red-600/50 group-hover:shadow-[0_0_40px_rgba(220,38,38,0.15)]">
+        <img src="{{ str_starts_with($movie->poster_url, 'http') ? $movie->poster_url : asset($movie->poster_url) }}" 
+             alt="{{ $movie->title }}" 
+             onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster+Available'"
+             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+        
+        {{-- Overlay Gradient --}}
+        <div class="absolute inset-0 bg-gradient-to-t from-[#050509] via-transparent to-transparent opacity-90"></div>
+        
+        {{-- Badge Durasi (Diperjelas) --}}
+        <div class="absolute top-4 right-4">
+            <span class="bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-black text-white uppercase tracking-widest shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 shadow-[0_0_5px_#dc2626]"></span>
+                {{ $movie->duration_minutes }} Min
+            </span>
+        </div>
+    </div>
+
+    {{-- Text Info --}}
+    <div class="mt-6 space-y-2">
+        {{-- Genre (Diperjelas dengan warna Red-500 & Shadow) --}}
+        <p class="text-[10px] text-red-500 uppercase tracking-[0.2em] font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {{ $movie->genre }}
+        </p>
+        
+        {{-- Title --}}
+        <h3 class="font-black text-white text-lg tracking-tight leading-tight group-hover:text-red-500 transition-colors uppercase italic">
+            {{ $movie->title }}
+        </h3>
+    </div>
+</div>
             @endforelse
         </div>
     </section>

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Exports\TicketSalesExport;
 use Maatwebsite\Excel\Facades\Excel;
 
+
 class SalesReportController extends Controller
 {
     public function index(Request $request)

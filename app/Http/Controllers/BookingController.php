@@ -121,23 +121,29 @@ class BookingController extends Controller
         return view('booking.ticket', compact('booking'));
     }
 
-    public function show($id)
-    {
-        $booking = Booking::with([
-            'showtime.movie',
-            'showtime.studio.branch',
-            'tickets.seat'
-        ])->where('user_id', Auth::id())->findOrFail($id);
+  public function show($id)
+{
+    $booking = Booking::with([
+        'showtime.movie',
+        'showtime.studio.branch',
+        'tickets.seat'
+    ])->where('user_id', Auth::id())->findOrFail($id);
 
-        // Auto-expire di halaman detail (opsional)
-        if ($booking->payment_status === 'pending' && $this->isBookingExpired($booking)) {
-            $this->expireBooking($booking);
-            $booking->refresh();
-        }
-
-        return view('user.booking-details', compact('booking'));
+    // Auto-expire di halaman detail
+    if ($booking->payment_status === 'pending' && $this->isBookingExpired($booking)) {
+        $this->expireBooking($booking);
+        $booking->refresh();
     }
 
+    // TAMBAHKAN INI: Jika permintaan datang dari AJAX/Polling, kirim JSON
+    if (request()->wantsJson()) {
+        return response()->json([
+            'payment_status' => $booking->payment_status
+        ]);
+    }
+
+    return view('user.booking-details', compact('booking'));
+}
     public function index(Request $request)
     {
         /**

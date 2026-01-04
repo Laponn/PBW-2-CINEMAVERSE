@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\ComingSoonMovieController;
 Route::get('/', [MovieController::class, 'index'])->name('home');
 Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movies.show');
 Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
-
+Route::post('/midtrans-callback', [PaymentController::class, 'callback']);
 // PUBLIC: Coming Soon (tidak perlu login)
 Route::get('/movies/coming-soon', [MovieController::class, 'comingSoon'])
     ->name('movies.comingSoon');
@@ -63,6 +63,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/booking/{booking}/payment', [PaymentController::class, 'pay'])
         ->name('booking.payment');
+
+    // TAMBAHKAN INI: Rute GET untuk menampilkan QRIS setelah redirect (Fix Turbo Error)
+    Route::get('/booking/{booking}/qris', [PaymentController::class, 'showQris'])
+        ->name('booking.payment.qris');
 
     // E-Ticket
     Route::get('/booking/{booking}/ticket', [BookingController::class, 'ticket'])
@@ -125,11 +129,11 @@ Route::post('/set-branch', function (Request $request) {
     $branch = Branch::findOrFail($request->branch_id);
 
     session([
-        'branch_id'   => $branch->id,
+        'branch_id' => $branch->id,
         'branch_name' => $branch->name,
         'branch_city' => $branch->city,
-        'branch_lat'  => (string) ($branch->latitude ?? ''),
-        'branch_lng'  => (string) ($branch->longitude ?? ''),
+        'branch_lat' => (string) ($branch->latitude ?? ''),
+        'branch_lng' => (string) ($branch->longitude ?? ''),
     ]);
 
     return response()->json(['ok' => true]);

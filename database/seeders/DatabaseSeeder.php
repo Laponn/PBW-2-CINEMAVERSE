@@ -12,13 +12,9 @@ use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         // 1. SEED USER (Admin & Customer)
-        // Pastikan role sesuai dengan migrasi ('admin', 'user')
         User::updateOrCreate(['email' => 'admin@cv.com'], [
             'name' => 'Admin CinemaVerse',
             'password' => bcrypt('password'),
@@ -31,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'user'
         ]);
 
-        // 2. SEED BRANCHES (Lengkap dengan Lat/Lng untuk Peta)
+        // 2. SEED BRANCHES
         $branches = [
             [
                 'name' => 'CinemaVerse Bandung Telkom',
@@ -60,8 +56,6 @@ class DatabaseSeeder extends Seeder
             $branch = Branch::updateOrCreate(['name' => $b['name']], $b);
 
             // 3. SEED STUDIOS per Cabang
-            // Setiap cabang dibuatkan 2 studio (Regular & VIP)
-            // base_price ditambahkan untuk menghindari Error 1364
             Studio::updateOrCreate(['name' => 'Studio 1', 'branch_id' => $branch->id], [
                 'type' => 'regular',
                 'base_price' => 35000, 
@@ -73,24 +67,26 @@ class DatabaseSeeder extends Seeder
                 'base_price' => 60000,
                 'capacity' => 30
             ]);
-            
-            // Catatan: Jika Model Studio memiliki fungsi booted(), 
-            // maka kursi A1-E10 akan otomatis terbuat di sini.
         }
 
-        // 4. SEED MOVIES (Memanggil MovieSeeder yang berisi 12 film)
+        // 4. SEED MOVIES
         $this->call(MovieSeeder::class);
 
-        // 5. SEED SHOWTIMES (Jadwal Tayang Otomatis)
+        // 5. SEED SHOWTIMES (DIPERBAIKI UNTUK TANGGAL 5 - 20 JANUARI)
         $allMovies = Movie::all();
         $allStudios = Studio::all();
         
-        // Membuat jadwal untuk hari ini dan besok agar web tidak kosong
-        $dates = [Carbon::now()->format('Y-m-d'), Carbon::tomorrow()->format('Y-m-d')];
+        // Logika pembuatan rentang tanggal 5 sampai 20 Januari 2026
+        $dates = [];
+        $startDate = Carbon::create(2026, 1, 5); // Mulai 5 Jan
+        for ($i = 0; $i <= 15; $i++) { // Looping selama 15 hari ke depan (sampai 20 Jan)
+            $dates[] = $startDate->copy()->addDays($i)->format('Y-m-d');
+        }
+
         $times = ['13:00', '15:30', '18:15', '21:00'];
 
         foreach ($allMovies as $movie) {
-            // Ambil 2 studio secara acak untuk setiap film agar jadwal tersebar
+            // Ambil 2 studio secara acak untuk setiap film
             $randomStudios = $allStudios->random(2);
             
             foreach ($randomStudios as $studio) {

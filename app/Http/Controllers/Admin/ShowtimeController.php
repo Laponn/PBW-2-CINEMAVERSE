@@ -1,169 +1,66 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Showtime;
 use App\Models\Movie;
-use App\Models\Studio;
-use Illuminate\Http\Request;
-use App\Models\Branch;
+use App\Models\Showtime;
+use App\Models\Ticket;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class ShowtimeController extends Controller
 {
-    // MENAMPILKAN DAFTAR JADWAL
-    // app/Http/Controllers/Admin/ShowtimeController.php
-
-    public function index(Request $request)
+    public function ticket(Movie $movie)
     {
-        // Ambil data untuk dropdown filter
-        $movies = Movie::orderBy('title')->get();
-        $branches = Branch::orderBy('name')->get();
-        $studios = Studio::with('branch')->orderBy('name')->get();
+        // Ambil branch_id dari session (hasil pilihan di navbar)
+        $branchId = session('branch_id');
 
-        // Query utama dengan filter Cabang, Film, Studio, dan Tanggal
-        $showtimes = Showtime::with(['movie', 'studio.branch'])
-            // Filter Cabang (Melalui relasi studio)
-            ->when($request->branch_id, function ($query) use ($request) {
-                return $query->whereHas('studio', function ($q) use ($request) {
-                    $q->where('branch_id', $request->branch_id);
-                });
-            })
-            ->when($request->movie_id, function ($query) use ($request) {
-                return $query->where('movie_id', $request->movie_id);
-            })
-            ->when($request->studio_id, function ($query) use ($request) {
-                return $query->where('studio_id', $request->studio_id);
-            })
-            ->when($request->date, function ($query) use ($request) {
-                return $query->whereDate('start_time', $request->date);
-            })
-            ->orderBy('start_time', 'desc')
-            ->get();
+        $query = Showtime::with(['studio.branch'])
+            ->where('movie_id', $movie->id)
+            ->where('start_time', '>=', now()->subHours(2)); // Beri toleransi 2 jam agar jadwal yang baru mulai tetap muncul
 
-        return view('admin.showtimes.index', compact('showtimes', 'movies', 'branches', 'studios'));
-    }
-    // FORM TAMBAH JADWAL
-    public function create()
-    {
-        // Hanya tampilkan film yang statusnya 'now_showing' atau 'coming_soon'
-        $movies = Movie::whereIn('status', ['now_showing', 'coming_soon'])->get();
+        // Jika ada cabang dipilih, filter berdasarkan cabang tersebut
+        if ($branchId) {
+            $query->whereHas('studio', function ($s) use ($branchId) {
+                $s->where('branch_id', $branchId);
+            });
+        }
 
-        // Ambil studio beserta cabang untuk dropdown grouping
-        $studios = Studio::with('branch')->get();
+        $showtimes = $query->orderBy('start_time')->get();
 
-        return view('admin.showtimes.create', compact('movies', 'studios'));
-    }
+        // Ambil tanggal unik untuk tombol pilihan tanggal
+        $availableDates = $showtimes->pluck('start_time')
+            ->map(fn($val) => Carbon::parse($val)->format('Y-m-d'))
+            ->unique()
+            ->values();
 
-    // PROSES SIMPAN JADWAL
-    public function store(Request $request)
-    {
-        $request->validate([
-            'movie_id' => 'required|exists:movies,id',
-            'studio_id' => 'required|exists:studios,id',
-            'start_time' => 'required|date|after:now', // Jadwal harus masa depan
-            'price' => 'required|numeric|min:0',
-        ]);
+        $movies = Movie::where('id', '!=', $movie->id)
+            ->where('status', 'now_showing')
+            ->latest()->take(6)->get();
 
-        // 1. Ambil data film untuk tahu durasinya
-        $movie = Movie::findOrFail($request->movie_id);
-
-        // 2. Hitung Waktu Selesai (Start + Durasi Film + 10 menit bersih-bersih)
-        $startTime = Carbon::parse($request->start_time);
-        $endTime = $startTime->copy()->addMinutes($movie->duration_minutes + 10);
-
-        // 3. Simpan
-        Showtime::create([
-            'movie_id' => $request->movie_id,
-            'studio_id' => $request->studio_id,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'price' => $request->price,
-        ]);
-
-        return redirect()->route('admin.showtimes.index')->with('success', 'Jadwal tayang berhasil dibuat!');
-    }
-
-    // FORM EDIT JADWAL
-    public function edit(Showtime $showtime)
-    {
-        $movies = Movie::all(); // Tampilkan semua film untuk edit
-        $studios = Studio::with('branch')->get();
-
-        return view('admin.showtimes.edit', compact('showtime', 'movies', 'studios'));
-    }
-
-    // PROSES UPDATE JADWAL
-    public function update(Request $request, Showtime $showtime)
-    {
-        $request->validate([
-            'movie_id' => 'required|exists:movies,id',
-            'studio_id' => 'required|exists:studios,id',
-            'start_time' => 'required|date',
-            'price' => 'required|numeric|min:0',
-        ]);
-
-        // Hitung ulang end_time jika film atau jam berubah
-        $movie = Movie::findOrFail($request->movie_id);
-        $startTime = Carbon::parse($request->start_time);
-        $endTime = $startTime->copy()->addMinutes($movie->duration_minutes + 10);
-
-        $showtime->update([
-            'movie_id' => $request->movie_id,
-            'studio_id' => $request->studio_id,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'price' => $request->price,
-        ]);
-
-        return redirect()->route('admin.showtimes.index')->with('success', 'Jadwal tayang berhasil diperbarui!');
-    }
-
-    // HAPUS JADWAL
-    public function destroy(Showtime $showtime)
-    {
-        $showtime->delete();
-        return redirect()->route('admin.showtimes.index')->with('success', 'Jadwal tayang dihapus');
-    }
-    public function ticket($id)
-    {
-        // Ambil data film dan jadwal tayangnya
-        $movie = \App\Models\Movie::findOrFail($id);
-
-        // Ambil semua jadwal tayang film ini, urutkan dari yang tercepat
-        $showtimes = \App\Models\Showtime::with(['studio.branch'])
-            ->where('movie_id', $id)
-            ->orderBy('start_time')
-            ->get();
-
-        // Filter tanggal unik untuk tab pemilihan hari
-        $availableDates = $showtimes->map(function ($st) {
-            return \Carbon\Carbon::parse($st->start_time)->format('Y-m-d');
-        })->unique();
-
-        return view('movies.ticket', compact('movie', 'showtimes', 'availableDates'));
+        return view('user.tiket', compact('movie', 'showtimes', 'availableDates', 'movies'));
     }
 
     public function getDetails($id)
     {
-        // Mengambil data jadwal, studio, kursi, dan cabang secara lengkap
-        $showtime = \App\Models\Showtime::with(['studio.seats', 'studio.branch'])->findOrFail($id);
+        // Pastikan relasi 'seats' dan 'branch' terpanggil
+        $showtime = Showtime::with(['studio.seats', 'studio.branch'])->findOrFail($id);
 
-        // Cek kursi yang sudah dipesan untuk jadwal ini (image_162cc6.png)
-        $occupiedSeats = \DB::table('booking_seats')
-            ->join('bookings', 'booking_seats.booking_id', '=', 'bookings.id')
-            ->where('bookings.showtime_id', $id)
-            ->pluck('booking_seats.seat_id')
+        // Kursi terisi (hanya yang sudah dibayar atau pending)
+        $occupiedSeats = Ticket::whereHas('booking', function ($q) use ($id) {
+                $q->where('showtime_id', $id)
+                  ->whereIn('payment_status', ['pending', 'paid']);
+            })
+            ->pluck('seat_id')
             ->toArray();
 
         return response()->json([
-            'price' => $showtime->price, // Harga asli dari tabel showtimes (image_162f8e.png)
+            'price'       => (float) $showtime->price,
             'studio_name' => $showtime->studio->name,
+            'studio_type' => $showtime->studio->type,
             'branch_name' => $showtime->studio->branch->name,
-            'seats' => $showtime->studio->seats, // Semua kursi di studio tersebut (image_162faf.png)
-            'occupied' => $occupiedSeats
+            'seats'       => $showtime->studio->seats,
+            'occupied'    => $occupiedSeats,
         ]);
     }
 }

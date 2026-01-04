@@ -6,10 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'CinemaVerse') }}</title>
 
+    {{-- Perbaikan: Menggunakan Vite, Menghapus CDN --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         body { background-color: #050509; color: white; }
@@ -22,14 +23,13 @@
     <div class="min-h-screen">
         @include('layouts.navigation')
 
-        {{-- Gunakan w-full agar tidak kejepit di tengah --}}
         <main class="w-full pt-20">
             @yield('content')
         </main>
     </div>
 
-    {{-- Masukkan modal di sini agar bisa dipanggil global --}}
+    {{-- Semua Modal Tetap Ada --}}
     <x-modal-map />
-    <x-modal-branch /> {{-- Modal untuk pilih lokasi --}}
+    <x-modal-branch /> 
 </body>
 </html>
