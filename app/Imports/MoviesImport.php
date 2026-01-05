@@ -11,12 +11,14 @@ class MoviesImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         return new Movie([
-            'title'            => $row['title'],
-            'genre'            => $row['genre'] ?? null,
+            'title' => $row['title'],
+            'description' => $row['description'] ?? '-', // WAJIB
+            'genre' => $row['genre'] ?? null,
             'duration_minutes' => $row['duration_minutes'],
-            'status'           => $row['status'],
-            'release_date'     => $row['release_date'] ?? now(),
-            'trailer_url'      => $row['trailer_url'] ?? null,
+            'status' => $row['status'],
+            'release_date' => $row['release_date'] ?? now(),
+            'trailer_url' => $row['trailer_url'] ?? null,
         ]);
+        
     }
 }

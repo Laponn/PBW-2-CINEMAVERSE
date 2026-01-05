@@ -60,8 +60,8 @@
             <div class="absolute right-0 top-[110px] translate-x-1/2 w-8 h-8 bg-[#05070b] rounded-full border-l border-white/5"></div>
         </div>
 
-        <a href="{{ route('dashboard') }}" class="block text-center mt-10 text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-[0.3em] transition">
-            ← Back to Dashboard
+        <a href="{{ route('booking.index') }}" class="block text-center mt-10 text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-[0.3em] transition">
+            ← Back 
         </a>
     </div>
 </div>

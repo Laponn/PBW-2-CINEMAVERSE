@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Branch;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        if (config('app.env') !== 'local' || request()->header('X-Forwarded-Proto') === 'https') {
+        URL::forceScheme('https');
+    
+    }
         View::composer('*', function ($view) {
             // Cache daftar branch agar tidak query DB terus-terusan tiap render view
             $branches = Cache::remember('branches:all', 60, function () {

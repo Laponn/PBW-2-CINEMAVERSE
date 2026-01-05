@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Models\Movie;
 use App\Models\Showtime;
 use App\Models\Ticket;
 use Carbon\Carbon;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+use App\Models\Branch;
+use App\Models\Studio;
+use Illuminate\Http\Request;
 
 class ShowtimeController extends Controller
 {
@@ -63,4 +67,44 @@ class ShowtimeController extends Controller
             'occupied'    => $occupiedSeats,
         ]);
     }
+    public function index(Request $request)
+{
+    $query = Showtime::with(['movie', 'studio.branch']);
+
+    // FILTER CABANG
+    if ($request->branch_id) {
+        $query->whereHas('studio', function ($q) use ($request) {
+            $q->where('branch_id', $request->branch_id);
+        });
+    }
+
+    // FILTER MOVIE
+    if ($request->movie_id) {
+        $query->where('movie_id', $request->movie_id);
+    }
+
+    // FILTER STUDIO
+    if ($request->studio_id) {
+        $query->where('studio_id', $request->studio_id);
+    }
+
+    // FILTER TANGGAL
+    if ($request->date) {
+        $query->whereDate('start_time', $request->date);
+    }
+
+    $showtimes = $query->orderBy('start_time')->get();
+
+    $branches = Branch::all();
+    $movies   = Movie::all();
+    $studios  = Studio::with('branch')->get();
+
+    return view('admin.showtimes.index', compact(
+        'showtimes',
+        'branches',
+        'movies',
+        'studios'
+    ));
+}
+
 }

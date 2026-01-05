@@ -21,24 +21,15 @@ use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\ComingSoonMovieController;
 
-/*
-|-------------------------------------------------------------------------- 
-| PUBLIC
-|-------------------------------------------------------------------------- 
-*/
+
 Route::get('/', [MovieController::class, 'index'])->name('home');
 Route::get('/movie/{id}', [MovieController::class, 'show'])->name('movies.show');
 Route::get('/search', [MovieController::class, 'search'])->name('movie.search');
 Route::post('/midtrans-callback', [PaymentController::class, 'callback']);
-// PUBLIC: Coming Soon (tidak perlu login)
+
 Route::get('/movies/coming-soon', [MovieController::class, 'comingSoon'])
     ->name('movies.comingSoon');
 
-/*
-|-------------------------------------------------------------------------- 
-| AUTH USER
-|-------------------------------------------------------------------------- 
-*/
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
@@ -76,11 +67,7 @@ Route::middleware('auth')->group(function () {
         ->name('booking.ticket.download');
 });
 
-/*
-|-------------------------------------------------------------------------- 
-| ADMIN
-|-------------------------------------------------------------------------- 
-*/
+
 Route::prefix('admin')
     ->middleware('auth') // kalau ada middleware admin: ['auth','is_admin']
     ->name('admin.')
@@ -115,11 +102,7 @@ Route::prefix('admin')
         Route::post('studios-import', [AdminStudioController::class, 'import'])->name('studios.import');
     });
 
-/*
-|-------------------------------------------------------------------------- 
-| BRANCH SESSION
-|-------------------------------------------------------------------------- 
-*/
+
 Route::post('/change-branch', function (Request $request) {
     session(['selected_branch_id' => $request->branch_id]);
     return redirect()->back();
