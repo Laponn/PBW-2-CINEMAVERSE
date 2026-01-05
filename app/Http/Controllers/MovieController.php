@@ -18,27 +18,26 @@ class MovieController extends Controller
         return view('movies.index', compact('movies'));
     }
 
-    // detail film (punya kamu: movies/show.blade.php)
     public function show($id)
-{
-    $movie = Movie::with(['showtimes.studio.branch'])
-        ->findOrFail($id);
+    {
+        $movie = Movie::with(['showtimes.studio.branch'])
+            ->findOrFail($id);
 
-    // Ambil semua showtime
-    $showtimes = $movie->showtimes;
+        // Ambil semua showtime
+        $showtimes = $movie->showtimes;
 
-    // Ambil tanggal unik dari start_time
-    $availableDates = $showtimes
-        ->map(fn ($st) => Carbon::parse($st->start_time)->format('Y-m-d'))
-        ->unique()
-        ->values();
+        // Ambil tanggal unik dari start_time
+        $availableDates = $showtimes
+            ->map(fn($st) => Carbon::parse($st->start_time)->format('Y-m-d'))
+            ->unique()
+            ->values();
 
-    return view('movies.show', compact(
-        'movie',
-        'showtimes',
-        'availableDates'
-    ));
-}
+        return view('movies.show', compact(
+            'movie',
+            'showtimes',
+            'availableDates'
+        ));
+    }
 
     public function search(Request $request)
     {
