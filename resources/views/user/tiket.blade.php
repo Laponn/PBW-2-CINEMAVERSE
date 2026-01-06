@@ -8,8 +8,8 @@
 
     /* 3D Perspective System */
     .perspective-wrap { perspective: 2000px; }
-    .premium-card { 
-        transform-style: preserve-3d; 
+    .premium-card {
+        transform-style: preserve-3d;
         transition: transform 0.3s ease-out;
         background: rgba(24, 24, 27, 0.4);
         backdrop-filter: blur(20px);
@@ -81,7 +81,7 @@
 
 <div class="bg-[#050509] min-h-screen text-white pt-28 pb-16">
     <div class="max-w-screen-2xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        
+
         <div class="lg:col-span-8 space-y-10">
             {{-- HEADER --}}
             <div class="space-y-2">
@@ -95,12 +95,12 @@
                     <div class="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center font-black italic text-sm shadow-[0_0_15px_rgba(220,38,38,0.5)]">01</div>
                     <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">Pilih Tanggal Menonton</h3>
                 </div>
-                
+
                 <div class="flex gap-4 overflow-x-auto pb-4 nice-scroll">
                     @forelse($availableDates as $date)
                         @php $cDate = \Illuminate\Support\Carbon::parse($date); @endphp
-                        <button type="button" 
-                            class="date-btn btn-step min-w-[110px] p-6 rounded-[2rem] border border-white/5 bg-white/5 group" 
+                        <button type="button"
+                            class="date-btn btn-step min-w-[110px] p-6 rounded-[2rem] border border-white/5 bg-white/5 group"
                             data-date="{{ $date }}"
                             data-date-display="{{ $cDate->translatedFormat('D, d M') }}">
                             <span class="block text-[10px] uppercase text-zinc-500 font-black mb-2 tracking-widest group-hover:text-zinc-300">{{ $cDate->translatedFormat('D') }}</span>
@@ -115,23 +115,56 @@
                 </div>
             </div>
 
-            {{-- STEP 2: PILIH JAM --}}
+            {{-- STEP 2: PILIH JADWAL (JAM + DESKRIPSI STUDIO VIP/REGULER) --}}
             <div id="time-section" class="premium-card p-8 rounded-[3rem] hidden">
                 <div class="flex items-center gap-4 mb-8">
                     <div class="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center font-black italic text-sm shadow-[0_0_15px_rgba(220,38,38,0.5)]">02</div>
-                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">Pilih Jam & Studio</h3>
+                    {{-- ✅ DIUBAH: Heading jadi Pilih Jadwal + deskripsi studio --}}
+                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">Pilih Jadwal & Jenis Studio (VIP / Reguler)</h3>
                 </div>
-                
+
                 <div id="time-container" class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     @foreach($showtimes as $st)
-                        <button type="button" class="time-btn btn-step p-6 rounded-[2.5rem] border border-white/5 bg-white/5 text-left hidden group" 
-                            data-date-ref="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('Y-m-d') }}" 
+                        @php
+                            $studioTypeRaw  = $st->studio->type ?? '';
+                            $studioTypeUp   = strtoupper($studioTypeRaw);
+                            $isVip          = str_contains($studioTypeUp, 'VIP');
+
+                            $studioLabel = $isVip ? 'VIP' : 'REGULER';
+                            $studioDesc  = $isVip
+                                ? 'Kursi recliner premium • Ruang kaki luas • Suasana lebih eksklusif'
+                                : 'Kursi standar nyaman • Cocok untuk semua penonton';
+                        @endphp
+
+                        <button type="button"
+                            class="time-btn btn-step p-6 rounded-[2.5rem] border border-white/5 bg-white/5 text-left hidden group"
+                            data-date-ref="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('Y-m-d') }}"
                             data-id="{{ $st->id }}"
-                            data-time="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('H:i') }}">
+                            data-time="{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('H:i') }}"
+                            {{-- ✅ tambahan dataset supaya summary bisa pakai info VIP/Reguler --}}
+                            data-studio-name="{{ $st->studio->name }}"
+                            data-studio-type="{{ $studioLabel }}"
+                            data-studio-desc="{{ $studioDesc }}"
+                        >
                             <span class="block font-black text-3xl italic tracking-tighter">{{ \Illuminate\Support\Carbon::parse($st->start_time)->format('H:i') }}</span>
-                            <div class="flex items-center justify-between mt-3">
-                                <span class="text-[9px] text-zinc-500 font-black uppercase tracking-widest">{{ $st->studio->name }}</span>
-                                <span class="text-[10px] text-red-500 font-black italic">Rp {{ number_format($st->price, 0, ',', '.') }}</span>
+
+                            {{-- ✅ DIUBAH: studio jadi deskripsi VIP/Reguler --}}
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest italic border
+                                            {{ $isVip ? 'bg-red-600/20 text-red-400 border-red-600/30' : 'bg-white/5 text-zinc-300 border-white/10' }}">
+                                            {{ $studioLabel }}
+                                        </span>
+                                        <span class="text-[9px] text-zinc-500 font-black uppercase tracking-widest">{{ $st->studio->name }}</span>
+                                    </div>
+
+                                    <span class="text-[10px] text-red-500 font-black italic">Rp {{ number_format($st->price, 0, ',', '.') }}</span>
+                                </div>
+
+                                <p class="text-[10px] text-zinc-500 font-semibold leading-snug">
+                                    {{ $studioDesc }}
+                                </p>
                             </div>
                         </button>
                     @endforeach
@@ -169,7 +202,7 @@
         <div class="lg:col-span-4">
             <div class="summary-sidebar p-10 rounded-[3.5rem] sticky top-28 shadow-2xl space-y-10 overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl -mr-16 -mt-16"></div>
-                
+
                 <div class="relative z-10">
                     <span class="text-[9px] font-black text-red-600 uppercase tracking-[0.4em] mb-3 block">Booking Summary</span>
                     <h2 class="text-3xl font-black italic tracking-tighter uppercase leading-none">{{ $movie->title }}</h2>
@@ -178,7 +211,7 @@
                         <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{{ session('branch_name', 'CinemaVerse City') }}</p>
                     </div>
                 </div>
-                
+
                 <div class="space-y-5 text-[11px] font-black border-t border-white/5 pt-8 uppercase tracking-[0.2em] relative z-10">
                     <div class="flex justify-between items-center"><span class="text-zinc-500">Studio</span><span id="sum-studio" class="text-white">-</span></div>
                     <div class="flex justify-between items-center"><span class="text-zinc-500">Waktu</span><span id="sum-time" class="text-white">-</span></div>
@@ -213,6 +246,12 @@ let selectedSeats = [];
 let activeDateLabel = "";
 
 function resetSummary() {
+    // ✅ dibenerin sekalian biar bener-bener reset
+    selectedPrice = 0;
+    selectedSeats = [];
+    document.getElementById('input-showtime').value = '';
+    document.getElementById('seat-inputs').innerHTML = '';
+
     document.getElementById('sum-studio').textContent = '-';
     document.getElementById('sum-time').textContent = '-';
     document.getElementById('sum-seats').textContent = '-';
@@ -223,7 +262,7 @@ function resetSummary() {
 function handleDateClick(btn) {
     document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('date-selected'));
     btn.classList.add('date-selected');
-    
+
     activeDateLabel = btn.dataset.dateDisplay;
     const selectedDate = btn.dataset.date;
 
@@ -234,8 +273,9 @@ function handleDateClick(btn) {
     });
 
     document.getElementById('seat-section').classList.add('hidden');
+    document.getElementById('seat-grid').innerHTML = '';
     resetSummary();
-    
+
     // Smooth scroll ke jam
     document.getElementById('time-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -243,25 +283,30 @@ function handleDateClick(btn) {
 async function handleTimeClick(btn) {
     document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('time-selected'));
     btn.classList.add('time-selected');
-    
+
     const showtimeId = btn.dataset.id;
     const timeLabel = btn.dataset.time;
     const grid = document.getElementById('seat-grid');
-    
+
     document.getElementById('seat-section').classList.remove('hidden');
     grid.innerHTML = '<div class="py-20 text-center text-[10px] font-black uppercase tracking-[0.5em] animate-pulse text-red-600">Initializing Cinema Hall...</div>';
+
+    // ✅ DIUBAH: summary studio pakai info VIP/Reguler dari tombol
+    const studioName = btn.dataset.studioName || '';
+    const studioType = btn.dataset.studioType || '';
+    const studioText = studioType ? `${studioType} • ${studioName}` : (studioName || '-');
+    document.getElementById('sum-studio').textContent = studioText;
 
     try {
         const res = await fetch(`/api/showtimes/${showtimeId}/details`);
         const data = await res.json();
-        
+
         selectedPrice = data.price;
         document.getElementById('input-showtime').value = showtimeId;
-        document.getElementById('sum-studio').textContent = data.studio_name;
         document.getElementById('sum-time').textContent = `${activeDateLabel} @ ${timeLabel}`;
-        
+
         renderSeats(data.seats, data.occupied);
-        
+
         // Smooth scroll ke kursi
         setTimeout(() => {
             document.getElementById('seat-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -273,7 +318,10 @@ async function handleTimeClick(btn) {
 
 function renderSeats(seats, occupied) {
     const grid = document.getElementById('seat-grid');
-    grid.innerHTML = ''; selectedSeats = []; updateSummary();
+    grid.innerHTML = '';
+    selectedSeats = [];
+    updateSummary();
+
     const rows = {};
     seats.forEach(s => {
         if(!rows[s.row_label]) rows[s.row_label] = [];
@@ -283,11 +331,11 @@ function renderSeats(seats, occupied) {
     Object.keys(rows).sort().forEach(label => {
         const rowDiv = document.createElement('div');
         rowDiv.className = "flex items-center gap-6 justify-center mb-4";
-        
+
         const labelSpan = document.createElement('span');
         labelSpan.className = "w-6 text-zinc-800 font-black text-[11px] italic";
         labelSpan.textContent = label;
-        
+
         const seatsWrap = document.createElement('div');
         seatsWrap.className = "flex gap-3";
 
@@ -298,7 +346,7 @@ function renderSeats(seats, occupied) {
             btn.className = `seat-base w-10 h-10 rounded-xl text-[10px] font-black border transition-all ${isTaken ? 'seat-occupied' : 'bg-white/5 border-white/10 text-zinc-500 seat-available'}`;
             btn.textContent = seat.seat_number;
             btn.disabled = isTaken;
-            
+
             if(!isTaken) {
                 btn.onclick = () => {
                     const idx = selectedSeats.findIndex(s => s.id === seat.id);
@@ -315,6 +363,7 @@ function renderSeats(seats, occupied) {
             }
             seatsWrap.appendChild(btn);
         });
+
         rowDiv.append(labelSpan, seatsWrap);
         grid.appendChild(rowDiv);
     });
@@ -322,14 +371,17 @@ function renderSeats(seats, occupied) {
 
 function updateSummary() {
     const btn = document.getElementById('checkoutBtn');
+
     document.getElementById('sum-seats').textContent = selectedSeats.length ? selectedSeats.map(s => s.name).join(', ') : '-';
     document.getElementById('sum-total').textContent = 'Rp ' + (selectedSeats.length * selectedPrice).toLocaleString('id-ID');
-    
+
     const wrap = document.getElementById('seat-inputs');
     wrap.innerHTML = '';
     selectedSeats.forEach(s => {
         const input = document.createElement('input');
-        input.type = 'hidden'; input.name = 'seat_ids[]'; input.value = s.id;
+        input.type = 'hidden';
+        input.name = 'seat_ids[]';
+        input.value = s.id;
         wrap.appendChild(input);
     });
 
