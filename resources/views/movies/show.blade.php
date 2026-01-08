@@ -1,22 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<main class="pt-24 pb-16 min-h-screen bg-[#050509] text-white">
-    <div class="max-w-screen-2xl mx-auto px-6 space-y-20">
+<main class="pt-20 pb-16 min-h-screen bg-[#050509] text-white">
+    <div class="max-w-screen-2xl mx-auto px-6 space-y-16">
 
-        {{-- TOMBOL KEMBALI --}}
-        <a href="{{ route('home') }}" class="inline-flex items-center gap-4 text-[11px] font-black text-zinc-500 hover:text-red-500 transition-all group uppercase tracking-[0.3em]">
-            <span class="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:bg-red-600 group-hover:border-red-600 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </span>
-            Katalog Film
-        </a>
-
-        {{-- HERO --}}
+        {{-- ✅ HERO --}}
         <section class="perspective-wrap">
             <div class="relative overflow-hidden rounded-[4rem] border border-white/5 bg-zinc-900/10 backdrop-blur-xl shadow-2xl">
+
+                {{-- ✅ TOMBOL KEMBALI nempel di card --}}
+                <a href="{{ route('home') }}"
+                   class="absolute top-6 left-6 z-20 inline-flex items-center gap-4
+                          text-[11px] font-black text-zinc-500 hover:text-red-500 transition-all
+                          group uppercase tracking-[0.3em]">
+                    <span class="w-10 h-10 rounded-full border border-white/10 bg-white/5
+                                 flex items-center justify-center
+                                 group-hover:bg-red-600 group-hover:border-red-600 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                  stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    Katalog Film
+                </a>
+
                 <div class="relative p-10 md:p-16 grid lg:grid-cols-[380px,1fr] gap-16 items-center">
 
                     {{-- POSTER --}}
@@ -59,10 +66,11 @@
                         </p>
 
                         <div class="flex flex-wrap items-center gap-6 pt-4">
-                                <a href="{{ route('movies.ticket', $movie->id) }}"
-                                   class="px-10 py-4 rounded-full bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-red-600/20 transition-all transform hover:scale-105 italic">
-                                    Beli Tiket
-                                </a>
+                            <a href="{{ route('movies.ticket', $movie->id) }}"
+                               class="px-10 py-4 rounded-full bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-red-600/20 transition-all transform hover:scale-105 italic">
+                                Beli Tiket
+                            </a>
+
                             @if($movie->trailer_url)
                                 <button type="button" id="btnTrailer"
                                     data-trailer-url="{{ $movie->trailer_url }}"
@@ -71,12 +79,12 @@
                                 </button>
                             @endif
                         </div>
-                        
                     </div>
 
                 </div>
             </div>
         </section>
+
         {{-- SECTION: DESKRIPSI STUDIO VIP & REGULER --}}
         @php
             $vipShowtimes = $movie->showtimes->filter(function($st) {
@@ -189,12 +197,10 @@
 
     </div>
 
-    {{-- ✅ MODAL TRAILER (Popup seperti TIX ID) --}}
+    {{-- ✅ MODAL TRAILER --}}
     <div id="trailerModal" class="hidden fixed inset-0 z-[9999] items-center justify-center p-4">
-        {{-- overlay --}}
         <div id="trailerOverlay" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
 
-        {{-- modal --}}
         <div class="relative w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/80 shadow-2xl">
             <div class="flex items-center justify-between px-6 py-5 border-b border-white/10">
                 <div class="text-[10px] font-black uppercase tracking-[0.35em] text-zinc-400 italic">
@@ -241,8 +247,6 @@
 <script>
     function toEmbed(url) {
         if (!url) return '';
-
-        // sudah embed
         if (url.includes('youtube.com/embed/')) {
             return url.includes('?')
                 ? url + '&autoplay=1&rel=0&modestbranding=1'
@@ -250,28 +254,15 @@
         }
 
         let id = null;
-
         try {
             const u = new URL(url);
-
-            // youtu.be/<id>
             if (u.hostname.includes('youtu.be')) {
                 id = u.pathname.split('/').filter(Boolean)[0] || null;
             }
-
-            // youtube.com/watch?v=<id>
             if (!id && (u.hostname.includes('youtube.com') || u.hostname.includes('m.youtube.com'))) {
                 id = u.searchParams.get('v') || null;
-
-                // youtube.com/shorts/<id>
-                if (!id && u.pathname.startsWith('/shorts/')) {
-                    id = u.pathname.split('/')[2] || null;
-                }
-
-                // youtube.com/embed/<id>
-                if (!id && u.pathname.startsWith('/embed/')) {
-                    id = u.pathname.split('/')[2] || null;
-                }
+                if (!id && u.pathname.startsWith('/shorts/')) id = u.pathname.split('/')[2] || null;
+                if (!id && u.pathname.startsWith('/embed/')) id = u.pathname.split('/')[2] || null;
             }
         } catch (e) {
             const m = String(url).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/);
@@ -279,39 +270,10 @@
         }
 
         if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
-
-        // fallback non-youtube (kalau kamu pakai mp4 direct)
         return url;
     }
 
     function initMovieDetailPage() {
-        // ==== Synopsis Toggle ====
-        const synopsisBtn = document.getElementById('btnSynopsis');
-        const synopsisSection = document.getElementById('synopsisSection');
-        const closeSynopsisBtn = document.getElementById('btnCloseSynopsis');
-
-        if (synopsisBtn && !synopsisBtn.dataset.bound) {
-            synopsisBtn.dataset.bound = "1";
-            synopsisBtn.addEventListener('click', () => {
-                if (!synopsisSection) return;
-                synopsisSection.classList.remove('hidden');
-                synopsisSection.classList.add('fadeUp');
-                setTimeout(() => synopsisSection.classList.remove('fadeUp'), 400);
-
-                const target = document.getElementById('synopsis-card');
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        }
-
-        if (closeSynopsisBtn && !closeSynopsisBtn.dataset.bound) {
-            closeSynopsisBtn.dataset.bound = "1";
-            closeSynopsisBtn.addEventListener('click', () => {
-                if (!synopsisSection) return;
-                synopsisSection.classList.add('hidden');
-            });
-        }
-
-        // ==== Trailer Modal ====
         const trailerModal = document.getElementById('trailerModal');
         const trailerFrame = document.getElementById('trailerFrame');
         const trailerOverlay = document.getElementById('trailerOverlay');
@@ -342,12 +304,6 @@
             trailerBtn.addEventListener('click', () => openTrailer(trailerBtn.dataset.trailerUrl));
         }
 
-        const trailerInside = document.getElementById('btnTrailerInside');
-        if (trailerInside && !trailerInside.dataset.bound) {
-            trailerInside.dataset.bound = "1";
-            trailerInside.addEventListener('click', () => openTrailer(trailerInside.dataset.trailerUrl));
-        }
-
         if (trailerOverlay && !trailerOverlay.dataset.bound) {
             trailerOverlay.dataset.bound = "1";
             trailerOverlay.addEventListener('click', closeTrailer);
@@ -358,7 +314,6 @@
             closeTrailerBtn.addEventListener('click', closeTrailer);
         }
 
-        // ESC close (bind sekali saja)
         if (!window.__movieTrailerEscBound) {
             window.__movieTrailerEscBound = true;
             document.addEventListener('keydown', (e) => {
@@ -366,7 +321,6 @@
             });
         }
 
-        // ==== Tilt 3D ====
         document.querySelectorAll('.movie-tilt-card').forEach(card => {
             if (card.dataset.tiltBound) return;
             card.dataset.tiltBound = "1";

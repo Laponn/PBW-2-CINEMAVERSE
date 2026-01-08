@@ -15,13 +15,14 @@
         <div class="nav-sweep"></div>
     </div>
 
-    <div class="relative w-full h-full px-6 flex items-center justify-between">
+    {{-- ✅ NOTE: ganti justify-between -> gap-6 + flex-1 biar kiri/kanan fleksibel --}}
+    <div class="relative w-full h-full px-6 flex items-center gap-6">
 
         {{-- LEFT --}}
-        <div class="flex items-center gap-10 w-1/3">
+        <div class="flex items-center gap-8 flex-1 min-w-0">
 
             {{-- LOGO --}}
-            <a href="/" class="flex items-center gap-3 group">
+            <a href="/" class="flex items-center gap-3 group flex-none">
                 <div
                     class="relative w-11 h-11 rounded-full bg-red-600
                            flex items-center justify-center
@@ -61,10 +62,13 @@
                     Tiket Saya
                 </a>
             </div>
+
+            {{-- ✅ SLOT tambahan (contoh: tombol Katalog Film dari halaman detail) --}}
+            @stack('navbar-left')
         </div>
 
         {{-- CENTER --}}
-        <div class="flex justify-center w-1/3">
+        <div class="flex-none flex justify-center">
             <div class="relative bg-red-600/20 p-1 rounded-full border border-red-600/30">
                 <button type="button"
                         onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'branch-modal' }))"
@@ -89,7 +93,7 @@
         </div>
 
         {{-- RIGHT --}}
-        <div class="flex items-center justify-end gap-6 w-1/3">
+        <div class="flex items-center justify-end gap-6 flex-1 min-w-0">
 
             {{-- SEARCH --}}
             <form action="{{ route('movie.search') }}" class="relative hidden xl:block group">
@@ -193,9 +197,7 @@
 
 {{-- ===== EXTRA STYLE ===== --}}
 <style>
-    body {
-        background-color: #050509;
-    }
+    body { background-color: #050509; }
 
     .nav-glow {
         box-shadow:
@@ -209,9 +211,7 @@
         transition: color .3s ease;
     }
 
-    .nav-link:hover {
-        color: #fff;
-    }
+    .nav-link:hover { color: #fff; }
 
     .nav-link::after {
         content: "";
@@ -231,9 +231,7 @@
         width: 100%;
     }
 
-    .nav-link.active {
-        color: #fff;
-    }
+    .nav-link.active { color: #fff; }
 
     .nav-sweep {
         position: absolute;
